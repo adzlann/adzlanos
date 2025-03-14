@@ -1,0 +1,82 @@
+---
+description: Every request in agent should refer this
+globs: 
+alwaysApply: true
+---
+
+
+As an expert full-stack developer, you will build a web-based operating system experience inspired by classic Mac OS System 7. The project must include the following technologies, features, and requirements:
+
+1. Project Setup & Structure:
+   • Initialize a new React 18 project using Vite and TypeScript.
+   • Use a package manager npm that works well with Vite/React/TypeScript.
+   • Install and configure TailwindCSS for styling.
+   • Include shadcn/ui components (https://ui.shadcn.com) for additional, modern UI elements.
+
+2. Base Design & Layout:
+   • Implement a UI inspired by Mac OS System 7: grayscale backgrounds, retro typography, and window widgets reminiscent of late 80s/early 90s Apple design.
+   • Ensure responsive design for all screen sizes.
+
+3. Window Management:
+   • Allow users to move windows by dragging the title bar.
+   • Allow resizing via dragging window edges/corners.
+   • Include essential window actions: close, maximize, minimize (or zoom).
+   • Use local component state or a global state solution (e.g., Redux, Zustand) to track window positions, sizes, and z-index stacking.
+
+4. File System (with local browser storage):
+   • Create “Documents” and “Applications” folders to simulate a file system. 
+     - User cannot create new folders or upload files (static placeholders only).
+     - However, any new TextEdit documents should save to the “Documents” folder using local storage.
+   • The “Finder” application should display files/folders. 
+     - Users can only delete documents they created with TextEdit. 
+     - Other placeholder files/folders in Finder are static and uneditable.
+
+5. Built-In Applications:
+   1) Finder
+      • Displays folders (Documents, Applications) and contained files.  
+      • Double-clicking an application icon (Finder, TextEdit, Minesweeper) launches that app’s window.
+
+   2) TextEdit
+      • Allows users to create/edit plain-text documents.  
+      • Implement Save, Open, Close functionality.  
+      • When saving, the document is stored in the “Documents” folder in local storage.  
+      • Users may delete or rename these documents from within Finder.
+
+   3) Minesweeper
+      • Classic puzzle game at a fixed “medium” difficulty.  
+      • No difficulty selection; always medium.
+
+6. Top Menu & Interactions:
+   • Add an Apple (/🍎) menu in the top-left corner.  
+   • Within this menu, include system functions (e.g., About, Restart of the local environment, etc.). These can be placeholders or minimal popups for demonstration.
+   • Provide instructions: “Double-click on any app icon to launch” and “Drag windows...” etc.
+
+7. Additional Requirements:
+   • Maintain authentic System 7–style typography (e.g., Chicago-like fonts). If a direct font is unavailable, use a suitable alternative to achieve a retro look.  
+   • Persist all user-created documents in local storage.  
+   • Provide instructions so users clearly understand all restrictions (e.g., can’t create folders, can’t upload files, only TextEdit docs are deletable, etc.).
+
+8. Step-by-Step Implementation Outline:
+   1) Initialize the project (Vite + React + TypeScript).  
+   2) Set up TailwindCSS and confirm styling is working (e.g., a test component).  
+   3) Integrate shadcn/ui components.  
+   4) Create the main desktop layout with a top bar featuring the Apple menu.  
+   5) Implement or mock an icon-based “desktop” for launching Finder, TextEdit, and Minesweeper.  
+   6) Build window management logic (dragging, resizing, close, maximize).  
+   7) Implement the Finder:  
+      - Display Documents and Applications folders.  
+      - Display user-created TextEdit docs in Documents.  
+      - Launch applications from Applications folder icons.  
+   8) Build TextEdit with basic create, edit, save, close.  
+      - Store documents in local storage.  
+      - Reflect changes in Finder.  
+   9) Implement Minesweeper with a medium difficulty by default.  
+      - Basic puzzle logic with no difficulty toggle.  
+   10) Final styling pass for the System 7 look-and-feel (fonts, colors, window decorations).  
+   11) Test for responsiveness and local storage persistence.  
+
+9. Package Manager & Scripts:
+   • Use your preferred package manager (npm, Yarn, or PNPM).  
+   • Provide the usual scripts: “dev” to start locally, “build” to generate production files, and “serve” or “preview” to test the build output.  
+
+Please implement all of the steps in the order given and provide any relevant configuration details (like tailwind.config.js, Vite config, and file structure) as you go. DO IT STEP BY STEP AND DONT GO TO NEXT STEP UNLESS I ASKED U TO.
