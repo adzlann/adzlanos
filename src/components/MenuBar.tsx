@@ -26,9 +26,25 @@ const applications = [
 
 export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps) {
   const [isAppleMenuOpen, setIsAppleMenuOpen] = useState(false);
+  const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
+  const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
 
   const handleAppleMenuClick = () => {
     setIsAppleMenuOpen(!isAppleMenuOpen);
+    setIsFileMenuOpen(false);
+    setIsEditMenuOpen(false);
+  };
+
+  const handleFileMenuClick = () => {
+    setIsFileMenuOpen(!isFileMenuOpen);
+    setIsAppleMenuOpen(false);
+    setIsEditMenuOpen(false);
+  };
+
+  const handleEditMenuClick = () => {
+    setIsEditMenuOpen(!isEditMenuOpen);
+    setIsAppleMenuOpen(false);
+    setIsFileMenuOpen(false);
   };
 
   const handleAboutClick = () => {
@@ -43,9 +59,18 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
     }
   };
 
+  const handleNewFinderWindow = () => {
+    if (onAppLaunch) {
+      onAppLaunch('macintoshHd');
+      setIsFileMenuOpen(false);
+    }
+  };
+
   // Close menu when clicking outside
   const handleClickOutside = () => {
     setIsAppleMenuOpen(false);
+    setIsFileMenuOpen(false);
+    setIsEditMenuOpen(false);
   };
 
   return (
@@ -57,8 +82,18 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
         >
           🍎
         </button>
-        <span className="text-base hover:bg-black hover:text-white px-2 cursor-pointer">File</span>
-        <span className="text-base hover:bg-black hover:text-white px-2 cursor-pointer">Edit</span>
+        <button 
+          className="text-base hover:bg-black hover:text-white px-2 cursor-pointer"
+          onClick={handleFileMenuClick}
+        >
+          File
+        </button>
+        <button 
+          className="text-base hover:bg-black hover:text-white px-2 cursor-pointer"
+          onClick={handleEditMenuClick}
+        >
+          Edit
+        </button>
         <span className="text-base hover:bg-black hover:text-white px-2 cursor-pointer">View</span>
         <span className="text-base hover:bg-black hover:text-white px-2 cursor-pointer">Special</span>
       </div>
@@ -98,6 +133,103 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
           </div>
         </>
       )}
+
+      {isFileMenuOpen && (
+        <>
+          <div 
+            className="fixed inset-0"
+            onClick={handleClickOutside}
+          />
+          <div className="absolute top-7 left-[40px] w-48 bg-white border border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] z-50">
+            <div className="py-1">
+              <button 
+                onClick={handleNewFinderWindow}
+                className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white border-b border-gray-200"
+              >
+                New Finder Window
+              </button>
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+              >
+                New Folder
+              </button>
+              <div className="mt-1 border-b border-gray-200" />
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+              >
+                Move to Trash
+              </button>
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+              >
+                Empty Trash...
+              </button>
+              <div className="mt-1 border-b border-gray-200" />
+              <button 
+                onClick={handleClickOutside}
+                className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {isEditMenuOpen && (
+        <>
+          <div 
+            className="fixed inset-0"
+            onClick={handleClickOutside}
+          />
+          <div className="absolute top-7 left-[85px] w-48 bg-white border border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] z-50">
+            <div className="py-1">
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed border-b border-gray-200"
+              >
+                Undo
+              </button>
+              <div className="mt-1 border-b border-gray-200" />
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+              >
+                Cut
+              </button>
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+              >
+                Copy
+              </button>
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+              >
+                Paste
+              </button>
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed border-b border-gray-200"
+              >
+                Clear
+              </button>
+              <div className="mt-1 border-b border-gray-200" />
+              <button 
+                disabled
+                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+              >
+                Select All
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="text-base">
         {currentTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
       </div>

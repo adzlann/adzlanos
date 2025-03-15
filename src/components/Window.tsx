@@ -135,6 +135,7 @@ export function Window({
         height: size.height,
         zIndex: getZIndex(id),
       }}
+      onClick={() => bringToFront(id)}
     >
       {/* Title Bar */}
       <div 

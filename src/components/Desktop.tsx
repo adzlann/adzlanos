@@ -6,6 +6,7 @@ import { FinderWindow } from './FinderWindow';
 import { TextEditWindow } from './TextEditWindow';
 import { MinesweeperWindow } from './MinesweeperWindow';
 import { InternetExplorerWindow } from './InternetExplorerWindow';
+import { useWindow } from '../contexts/WindowContext';
 
 interface Application {
   id: string;
@@ -49,6 +50,7 @@ export function Desktop() {
   const [showMinesweeper, setShowMinesweeper] = useState(false);
   const [showInternetExplorer, setShowInternetExplorer] = useState(false);
   const [apps] = useState<Application[]>(defaultApps);
+  const { bringToFront } = useWindow();
 
   // Update clock
   useEffect(() => {
@@ -68,15 +70,19 @@ export function Desktop() {
     switch (id) {
       case 'macintoshHd':
         setShowFinderWindow(true);
+        bringToFront('finder');
         break;
       case 'textedit':
         setShowTextEdit(true);
+        bringToFront('textedit');
         break;
       case 'minesweeper':
         setShowMinesweeper(true);
+        bringToFront('minesweeper');
         break;
       case 'internetexplorer':
         setShowInternetExplorer(true);
+        bringToFront('internetexplorer');
         break;
     }
   };
@@ -85,7 +91,10 @@ export function Desktop() {
     <div className="h-full flex flex-col">
       <MenuBar 
         currentTime={currentTime}
-        onAboutClick={() => setShowAboutWindow(true)}
+        onAboutClick={() => {
+          setShowAboutWindow(true);
+          bringToFront('about');
+        }}
         onAppLaunch={handleAppLaunch}
       />
       <div 
@@ -107,31 +116,31 @@ export function Desktop() {
         {showAboutWindow && (
           <AboutWindow 
             id="about"
-            onClose={() => setShowAboutWindow(false)} 
+            onClose={() => setShowAboutWindow(false)}
           />
         )}
         {showFinderWindow && (
           <FinderWindow 
             id="finder"
-            onClose={() => setShowFinderWindow(false)} 
+            onClose={() => setShowFinderWindow(false)}
           />
         )}
         {showTextEdit && (
           <TextEditWindow 
             id="textedit"
-            onClose={() => setShowTextEdit(false)} 
+            onClose={() => setShowTextEdit(false)}
           />
         )}
         {showMinesweeper && (
           <MinesweeperWindow 
             id="minesweeper"
-            onClose={() => setShowMinesweeper(false)} 
+            onClose={() => setShowMinesweeper(false)}
           />
         )}
         {showInternetExplorer && (
           <InternetExplorerWindow 
             id="internetexplorer"
-            onClose={() => setShowInternetExplorer(false)} 
+            onClose={() => setShowInternetExplorer(false)}
           />
         )}
       </div>

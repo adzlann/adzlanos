@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { TextEditWindow } from './TextEditWindow';
 import { MinesweeperWindow } from './MinesweeperWindow';
 import { InternetExplorerWindow } from './InternetExplorerWindow';
+import { useWindow } from '../contexts/WindowContext';
 
 interface File {
   id: string;
@@ -49,17 +50,21 @@ export function ApplicationsWindow({ onClose, id }: ApplicationsWindowProps) {
   const [showTextEdit, setShowTextEdit] = useState(false);
   const [showMinesweeper, setShowMinesweeper] = useState(false);
   const [showInternetExplorer, setShowInternetExplorer] = useState(false);
+  const { bringToFront } = useWindow();
 
   const handleDoubleClick = (file: File) => {
     switch (file.id) {
       case 'textedit':
         setShowTextEdit(true);
+        bringToFront(`${id}-textedit`);
         break;
       case 'minesweeper':
         setShowMinesweeper(true);
+        bringToFront(`${id}-minesweeper`);
         break;
       case 'internetexplorer':
         setShowInternetExplorer(true);
+        bringToFront(`${id}-internetexplorer`);
         break;
     }
   };
