@@ -3,9 +3,28 @@ import { useState } from 'react'
 interface MenuBarProps {
   currentTime: Date;
   onAboutClick: () => void;
+  onAppLaunch?: (id: string) => void;
 }
 
-export function MenuBar({ currentTime, onAboutClick }: MenuBarProps) {
+const applications = [
+  {
+    id: 'textedit',
+    name: 'TextEdit',
+    icon: '📝',
+  },
+  {
+    id: 'minesweeper',
+    name: 'Minesweeper',
+    icon: '💣',
+  },
+  {
+    id: 'internetexplorer',
+    name: 'Internet Explorer',
+    icon: '🌐',
+  }
+];
+
+export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps) {
   const [isAppleMenuOpen, setIsAppleMenuOpen] = useState(false);
 
   const handleAppleMenuClick = () => {
@@ -15,6 +34,13 @@ export function MenuBar({ currentTime, onAboutClick }: MenuBarProps) {
   const handleAboutClick = () => {
     onAboutClick();
     setIsAppleMenuOpen(false);
+  };
+
+  const handleAppClick = (id: string) => {
+    if (onAppLaunch) {
+      onAppLaunch(id);
+      setIsAppleMenuOpen(false);
+    }
   };
 
   // Close menu when clicking outside
@@ -55,16 +81,19 @@ export function MenuBar({ currentTime, onAboutClick }: MenuBarProps) {
               <button className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white">
                 Control Panel
               </button>
-              <button className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white border-b border-gray-200">
-                Chooser
-              </button>
-              <div className="mt-1" />
-              <button className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white">
-                Restart
-              </button>
-              <button className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white">
-                Shut Down
-              </button>
+              
+              {/* Applications Section */}
+              <div className="mt-1 border-b border-gray-200" />
+              {applications.map((app) => (
+                <button
+                  key={app.id}
+                  onClick={() => handleAppClick(app.id)}
+                  className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white flex items-center gap-2"
+                >
+                  <span>{app.icon}</span>
+                  <span>{app.name}</span>
+                </button>
+              ))}
             </div>
           </div>
         </>

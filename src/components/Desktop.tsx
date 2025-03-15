@@ -86,6 +86,7 @@ export function Desktop() {
       <MenuBar 
         currentTime={currentTime}
         onAboutClick={() => setShowAboutWindow(true)}
+        onAppLaunch={handleAppLaunch}
       />
       <div 
         className="flex-1 bg-[#000033] relative overflow-hidden"
