@@ -14,7 +14,6 @@ interface InternetExplorerWindowProps {
 export function InternetExplorerWindow({ onClose }: InternetExplorerWindowProps) {
   const defaultUrl = 'https://sarangresepi.vercel.app/';
   const [url, setUrl] = useState(defaultUrl);
-  const [isLoading, setIsLoading] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const bookmarks: Bookmark[] = [
@@ -25,7 +24,6 @@ export function InternetExplorerWindow({ onClose }: InternetExplorerWindowProps)
 
   const handleNavigate = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     if (iframeRef.current) {
       iframeRef.current.src = url;
     }
@@ -55,9 +53,9 @@ export function InternetExplorerWindow({ onClose }: InternetExplorerWindowProps)
       title="Internet Explorer"
       onClose={onClose}
       initialPosition={{ x: 150, y: 50 }}
-      initialSize={{ width: 800, height: 600 }}
+      initialSize={{ width: 1024, height: 720 }}
     >
-      <div className="h-full flex flex-col bg-white">
+      <div className="h-full flex flex-col">
         {/* Navigation Bar */}
         <div className="flex flex-col border-b border-gray-300">
           {/* URL Bar */}
@@ -110,15 +108,13 @@ export function InternetExplorerWindow({ onClose }: InternetExplorerWindowProps)
           <iframe
             ref={iframeRef}
             src={defaultUrl}
-            className="w-full h-full border-0"
-            onLoad={() => setIsLoading(false)}
+            className="w-full h-full"
+            style={{ display: 'block', border: 'none' }}
           />
         </div>
 
         {/* Status Bar */}
-        <div className="px-2 py-1 border-t border-gray-300 bg-[#f0f0f0] text-xs font-chicago">
-          {isLoading ? 'Loading...' : 'Done'}
-        </div>
+        <div className="h-5 border-t border-gray-300 bg-[#f0f0f0]" />
       </div>
     </Window>
   );

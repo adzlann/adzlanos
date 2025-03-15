@@ -208,9 +208,9 @@ export function TextEditWindow({ onClose, initialContent = '', documentName }: T
         initialPosition={{ x: 200, y: 100 }}
         initialSize={{ width: 600, height: 500 }}
       >
-        <div className="h-full flex flex-col bg-white [&>*]:p-0 [&>*]:m-0">
-          {/* Toolbar - Add negative margins to counter parent padding */}
-          <div className="border-b border-gray-400 flex items-center bg-[#DDDDDD] w-full -mx-2 h-10">
+        <div className="h-full flex flex-col bg-white">
+          {/* Toolbar */}
+          <div className="border-b border-gray-400 flex items-center bg-[#DDDDDD] w-full h-10">
             {/* Text Style Buttons */}
             <div className="flex items-center h-full pl-2">
               <button
@@ -339,12 +339,13 @@ export function TextEditWindow({ onClose, initialContent = '', documentName }: T
           {/* Text Editor */}
           <div
             ref={editorRef}
-            className={`flex-1 p-4 text-sm outline-none overflow-auto ${selectedFont.value}`}
+            className={`flex-1 outline-none overflow-auto ${selectedFont.value}`}
             contentEditable
             onInput={() => setIsEdited(true)}
             style={{ 
               whiteSpace: 'pre-wrap',
-              minHeight: '100%'
+              minHeight: '100%',
+              padding: '4px 16px'
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (activeFormats.bulletList || activeFormats.numberList)) {

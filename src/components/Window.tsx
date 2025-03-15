@@ -9,6 +9,7 @@ interface WindowProps {
   initialSize?: { width: number; height: number };
   onClose: () => void;
   disableResize?: boolean;
+  className?: string;
 }
 
 export function Window({ 
@@ -17,7 +18,8 @@ export function Window({
   initialPosition = { x: 100, y: 50 },
   initialSize = { width: 400, height: 300 },
   onClose,
-  disableResize = false
+  disableResize = false,
+  className = ''
 }: WindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
@@ -136,7 +138,7 @@ export function Window({
       </div>
 
       {/* Window Content */}
-      <div className="absolute inset-[21px] bottom-3">
+      <div className={`absolute inset-0 top-5 ${className}`}>
         {children}
       </div>
 
