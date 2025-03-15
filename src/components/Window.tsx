@@ -8,6 +8,7 @@ interface WindowProps {
   initialPosition?: { x: number; y: number };
   initialSize?: { width: number; height: number };
   onClose: () => void;
+  disableResize?: boolean;
 }
 
 export function Window({ 
@@ -15,7 +16,8 @@ export function Window({
   children, 
   initialPosition = { x: 100, y: 50 },
   initialSize = { width: 400, height: 300 },
-  onClose 
+  onClose,
+  disableResize = false
 }: WindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
@@ -139,30 +141,34 @@ export function Window({
       </div>
 
       {/* Resize Handles */}
-      <div 
-        className="absolute top-5 right-0 w-2 h-[calc(100%-25px)] cursor-e-resize hover:bg-black/5"
-        onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
-      />
-      <div 
-        className="absolute top-5 left-0 w-2 h-[calc(100%-25px)] cursor-w-resize hover:bg-black/5"
-        onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
-      />
-      <div 
-        className="absolute bottom-0 left-2 right-2 h-2 cursor-s-resize hover:bg-black/5"
-        onMouseDown={(e) => handleResizeMouseDown(e, 's')}
-      />
-      <div 
-        className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
-        onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
-      >
-        <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-black" />
-      </div>
-      <div 
-        className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize"
-        onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
-      >
-        <div className="absolute bottom-1 left-1 w-2 h-2 border-l-2 border-b-2 border-black" />
-      </div>
+      {!disableResize && (
+        <>
+          <div 
+            className="absolute top-5 right-0 w-2 h-[calc(100%-25px)] cursor-e-resize hover:bg-black/5"
+            onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+          />
+          <div 
+            className="absolute top-5 left-0 w-2 h-[calc(100%-25px)] cursor-w-resize hover:bg-black/5"
+            onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
+          />
+          <div 
+            className="absolute bottom-0 left-2 right-2 h-2 cursor-s-resize hover:bg-black/5"
+            onMouseDown={(e) => handleResizeMouseDown(e, 's')}
+          />
+          <div 
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+          >
+            <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-black" />
+          </div>
+          <div 
+            className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+          >
+            <div className="absolute bottom-1 left-1 w-2 h-2 border-l-2 border-b-2 border-black" />
+          </div>
+        </>
+      )}
     </div>
   );
 } 

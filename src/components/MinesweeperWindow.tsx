@@ -180,6 +180,7 @@ export function MinesweeperWindow({ onClose }: MinesweeperWindowProps) {
       onClose={onClose}
       initialPosition={{ x: 200, y: 100 }}
       initialSize={{ width: 320, height: 400 }}
+      disableResize={true}
     >
       <div className="h-full flex flex-col bg-[#c0c0c0] p-2">
         {/* Header */}
