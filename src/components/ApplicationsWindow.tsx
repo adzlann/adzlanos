@@ -2,6 +2,7 @@ import { Window } from './Window';
 import { useState } from 'react';
 import { TextEditWindow } from './TextEditWindow';
 import { MinesweeperWindow } from './MinesweeperWindow';
+import { InternetExplorerWindow } from './InternetExplorerWindow';
 
 interface File {
   id: string;
@@ -32,12 +33,21 @@ const applicationFiles: File[] = [
     type: 'Application',
     size: '--',
     modified: '--'
+  },
+  {
+    id: 'internetexplorer',
+    name: 'Internet Explorer',
+    icon: '🌐',
+    type: 'Application',
+    size: '--',
+    modified: '--'
   }
 ];
 
 export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
   const [showTextEdit, setShowTextEdit] = useState(false);
   const [showMinesweeper, setShowMinesweeper] = useState(false);
+  const [showInternetExplorer, setShowInternetExplorer] = useState(false);
 
   const handleDoubleClick = (file: File) => {
     switch (file.id) {
@@ -46,6 +56,9 @@ export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
         break;
       case 'minesweeper':
         setShowMinesweeper(true);
+        break;
+      case 'internetexplorer':
+        setShowInternetExplorer(true);
         break;
     }
   };
@@ -110,6 +123,10 @@ export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
 
       {showMinesweeper && (
         <MinesweeperWindow onClose={() => setShowMinesweeper(false)} />
+      )}
+
+      {showInternetExplorer && (
+        <InternetExplorerWindow onClose={() => setShowInternetExplorer(false)} />
       )}
     </>
   );

@@ -5,6 +5,7 @@ import { MenuBar } from './MenuBar';
 import { FinderWindow } from './FinderWindow';
 import { TextEditWindow } from './TextEditWindow';
 import { MinesweeperWindow } from './MinesweeperWindow';
+import { InternetExplorerWindow } from './InternetExplorerWindow';
 
 interface Application {
   id: string;
@@ -15,32 +16,39 @@ interface Application {
 
 const defaultApps: Application[] = [
   {
-    id: 'macintoshhd',
+    id: 'macintoshHd',
     name: 'Macintosh HD',
-    icon: '💾',
-    position: { x: window.innerWidth - 100, y: 20 },
+    icon: '💽',
+    position: { x: window.innerWidth - 100, y: 20 }
   },
   {
     id: 'textedit',
     name: 'TextEdit',
     icon: '📝',
-    position: { x: window.innerWidth - 100, y: 100 },
+    position: { x: window.innerWidth - 100, y: 100 }
   },
   {
     id: 'minesweeper',
     name: 'Minesweeper',
     icon: '💣',
-    position: { x: window.innerWidth - 100, y: 180 },
+    position: { x: window.innerWidth - 100, y: 180 }
+  },
+  {
+    id: 'internetexplorer',
+    name: 'Internet Explorer',
+    icon: '🌐',
+    position: { x: window.innerWidth - 100, y: 260 }
   }
 ];
 
 export function Desktop() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [apps] = useState<Application[]>(defaultApps);
   const [showAboutWindow, setShowAboutWindow] = useState(false);
   const [showFinderWindow, setShowFinderWindow] = useState(false);
   const [showTextEdit, setShowTextEdit] = useState(false);
   const [showMinesweeper, setShowMinesweeper] = useState(false);
+  const [showInternetExplorer, setShowInternetExplorer] = useState(false);
+  const [apps] = useState<Application[]>(defaultApps);
 
   // Update clock
   useEffect(() => {
@@ -56,9 +64,9 @@ export function Desktop() {
     icons.forEach(icon => icon.classList.remove('selected'));
   };
 
-  const handleAppLaunch = (appId: string) => {
-    switch (appId) {
-      case 'macintoshhd':
+  const handleAppLaunch = (id: string) => {
+    switch (id) {
+      case 'macintoshHd':
         setShowFinderWindow(true);
         break;
       case 'textedit':
@@ -66,6 +74,9 @@ export function Desktop() {
         break;
       case 'minesweeper':
         setShowMinesweeper(true);
+        break;
+      case 'internetexplorer':
+        setShowInternetExplorer(true);
         break;
     }
   };
@@ -103,6 +114,9 @@ export function Desktop() {
         )}
         {showMinesweeper && (
           <MinesweeperWindow onClose={() => setShowMinesweeper(false)} />
+        )}
+        {showInternetExplorer && (
+          <InternetExplorerWindow onClose={() => setShowInternetExplorer(false)} />
         )}
       </div>
     </div>
