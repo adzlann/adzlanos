@@ -1,6 +1,7 @@
 import { Window } from './Window';
 import { useState } from 'react';
 import { TextEditWindow } from './TextEditWindow';
+import { MinesweeperWindow } from './MinesweeperWindow';
 
 interface File {
   id: string;
@@ -36,6 +37,7 @@ const applicationFiles: File[] = [
 
 export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
   const [showTextEdit, setShowTextEdit] = useState(false);
+  const [showMinesweeper, setShowMinesweeper] = useState(false);
 
   const handleDoubleClick = (file: File) => {
     switch (file.id) {
@@ -43,8 +45,7 @@ export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
         setShowTextEdit(true);
         break;
       case 'minesweeper':
-        // We'll implement this later
-        console.log('Opening Minesweeper');
+        setShowMinesweeper(true);
         break;
     }
   };
@@ -105,6 +106,10 @@ export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
 
       {showTextEdit && (
         <TextEditWindow onClose={() => setShowTextEdit(false)} />
+      )}
+
+      {showMinesweeper && (
+        <MinesweeperWindow onClose={() => setShowMinesweeper(false)} />
       )}
     </>
   );

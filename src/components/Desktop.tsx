@@ -4,6 +4,7 @@ import { AboutWindow } from './AboutWindow';
 import { MenuBar } from './MenuBar';
 import { FinderWindow } from './FinderWindow';
 import { TextEditWindow } from './TextEditWindow';
+import { MinesweeperWindow } from './MinesweeperWindow';
 
 interface Application {
   id: string;
@@ -39,6 +40,7 @@ export function Desktop() {
   const [showAboutWindow, setShowAboutWindow] = useState(false);
   const [showFinderWindow, setShowFinderWindow] = useState(false);
   const [showTextEdit, setShowTextEdit] = useState(false);
+  const [showMinesweeper, setShowMinesweeper] = useState(false);
 
   // Update clock
   useEffect(() => {
@@ -63,8 +65,7 @@ export function Desktop() {
         setShowTextEdit(true);
         break;
       case 'minesweeper':
-        // We'll implement this later
-        console.log('Launching Minesweeper');
+        setShowMinesweeper(true);
         break;
     }
   };
@@ -99,6 +100,9 @@ export function Desktop() {
         )}
         {showTextEdit && (
           <TextEditWindow onClose={() => setShowTextEdit(false)} />
+        )}
+        {showMinesweeper && (
+          <MinesweeperWindow onClose={() => setShowMinesweeper(false)} />
         )}
       </div>
     </div>
