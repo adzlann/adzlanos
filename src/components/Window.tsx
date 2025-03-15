@@ -17,7 +17,7 @@ interface WindowProps {
 export function Window({ 
   title, 
   children, 
-  initialPosition = { x: 100, y: 50 },
+  initialPosition = { x: 100, y: 60 },
   initialSize = { width: 400, height: 300 },
   onClose,
   disableResize = false,
@@ -138,13 +138,13 @@ export function Window({
     >
       {/* Title Bar */}
       <div 
-        className="h-5 bg-[linear-gradient(90deg,_#000_50%,_#000_50%)] bg-[length:2px_2px] cursor-move flex items-center justify-between px-1"
+        className="h-6 bg-[linear-gradient(90deg,_#000_50%,_#000_50%)] bg-[length:2px_2px] cursor-move flex items-center justify-between px-1"
         onMouseDown={handleMouseDown}
       >
         <div className="w-5" /> {/* Spacer for visual balance */}
-        <span className="text-white text-xs font-chicago select-none">{title}</span>
+        <span className="text-white text-base font-vt323 select-none">{title}</span>
         <button 
-          className="w-5 h-4 bg-white border border-black text-black text-xs flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300"
+          className="w-5 h-4 bg-white border border-black text-black text-base font-vt323 flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300"
           onClick={onClose}
         >
           ×
@@ -152,7 +152,7 @@ export function Window({
       </div>
 
       {/* Window Content */}
-      <div className={`absolute inset-0 top-5 ${className}`}>
+      <div className={`absolute inset-0 top-6 font-vt323 ${className}`}>
         {children}
       </div>
 
@@ -160,11 +160,11 @@ export function Window({
       {!disableResize && (
         <>
           <div 
-            className="absolute top-5 right-0 w-2 h-[calc(100%-25px)] cursor-e-resize"
+            className="absolute top-6 right-0 w-2 h-[calc(100%-30px)] cursor-e-resize"
             onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
           />
           <div 
-            className="absolute top-5 left-0 w-2 h-[calc(100%-25px)] cursor-w-resize"
+            className="absolute top-6 left-0 w-2 h-[calc(100%-30px)] cursor-w-resize"
             onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
           />
           <div 
