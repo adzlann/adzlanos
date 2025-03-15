@@ -19,6 +19,8 @@ export function InternetExplorerWindow({ onClose }: InternetExplorerWindowProps)
 
   const bookmarks: Bookmark[] = [
     { name: 'SarangResepi', url: 'https://sarangresepi.vercel.app/', icon: '🍳' },
+    { name: 'NewJeans', url: 'https://newjeans.kr', icon: '👖' },
+    { name: 'HyperCard', url: 'https://hcsimulator.com', icon: '💳' },
   ];
 
   const handleNavigate = (e: React.FormEvent) => {
