@@ -16,6 +16,7 @@ interface File {
 
 interface FinderWindowProps {
   onClose: () => void;
+  id: string;
 }
 
 const defaultFiles: File[] = [
@@ -48,7 +49,7 @@ const defaultFiles: File[] = [
   }
 ];
 
-export function FinderWindow({ onClose }: FinderWindowProps) {
+export function FinderWindow({ onClose, id }: FinderWindowProps) {
   const [showApplications, setShowApplications] = useState(false);
   const [showDocuments, setShowDocuments] = useState(false);
   const [showTrash, setShowTrash] = useState(false);
@@ -79,6 +80,7 @@ export function FinderWindow({ onClose }: FinderWindowProps) {
   return (
     <>
       <Window 
+        id={id}
         title="Macintosh HD" 
         onClose={onClose}
         initialPosition={{ x: 100, y: 50 }}
@@ -131,7 +133,10 @@ export function FinderWindow({ onClose }: FinderWindowProps) {
       </Window>
 
       {showApplications && (
-        <ApplicationsWindow onClose={() => setShowApplications(false)} />
+        <ApplicationsWindow 
+          id={`${id}-applications`}
+          onClose={() => setShowApplications(false)} 
+        />
       )}
 
       {showDocuments && (

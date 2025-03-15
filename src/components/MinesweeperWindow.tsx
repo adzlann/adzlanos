@@ -10,9 +10,10 @@ interface Cell {
 
 interface MinesweeperWindowProps {
   onClose: () => void;
+  id: string;
 }
 
-export function MinesweeperWindow({ onClose }: MinesweeperWindowProps) {
+export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
   const GRID_SIZE = 9;
   const MINE_COUNT = 10;
   const [gameOver, setGameOver] = useState(false);
@@ -176,6 +177,7 @@ export function MinesweeperWindow({ onClose }: MinesweeperWindowProps) {
 
   return (
     <Window
+      id={id}
       title="Minesweeper"
       onClose={onClose}
       initialPosition={{ x: 200, y: 100 }}

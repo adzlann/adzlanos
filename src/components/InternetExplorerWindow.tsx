@@ -9,9 +9,10 @@ interface Bookmark {
 
 interface InternetExplorerWindowProps {
   onClose: () => void;
+  id: string;
 }
 
-export function InternetExplorerWindow({ onClose }: InternetExplorerWindowProps) {
+export function InternetExplorerWindow({ onClose, id }: InternetExplorerWindowProps) {
   const defaultUrl = 'https://sarangresepi.vercel.app/';
   const [url, setUrl] = useState(defaultUrl);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -50,6 +51,7 @@ export function InternetExplorerWindow({ onClose }: InternetExplorerWindowProps)
 
   return (
     <Window
+      id={id}
       title="Internet Explorer"
       onClose={onClose}
       initialPosition={{ x: 150, y: 50 }}

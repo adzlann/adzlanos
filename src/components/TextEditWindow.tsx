@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 
 interface TextEditWindowProps {
   onClose: () => void;
+  id: string;
   initialContent?: string;
   documentName?: string;
 }
@@ -21,7 +22,7 @@ const fonts = [
   { name: 'Times', value: 'font-times' }
 ];
 
-export function TextEditWindow({ onClose, initialContent = '', documentName }: TextEditWindowProps) {
+export function TextEditWindow({ onClose, id, initialContent = '', documentName }: TextEditWindowProps) {
   const [fileName, setFileName] = useState(documentName || 'Untitled');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [isEdited, setIsEdited] = useState(false);
@@ -203,10 +204,11 @@ export function TextEditWindow({ onClose, initialContent = '', documentName }: T
   return (
     <>
       <Window
+        id={id}
         title={`${fileName}${isEdited ? ' •' : ''} - TextEdit`}
         onClose={handleClose}
-        initialPosition={{ x: 200, y: 100 }}
-        initialSize={{ width: 600, height: 500 }}
+        initialPosition={{ x: 150, y: 50 }}
+        initialSize={{ width: 500, height: 400 }}
       >
         <div className="h-full flex flex-col bg-white">
           {/* Toolbar */}
@@ -362,10 +364,12 @@ export function TextEditWindow({ onClose, initialContent = '', documentName }: T
       {/* Save Dialog */}
       {showSaveDialog && (
         <Window
-          title="Save Document"
+          id={`${id}-save-dialog`}
+          title="Save As..."
           onClose={() => setShowSaveDialog(false)}
           initialPosition={{ x: 250, y: 150 }}
-          initialSize={{ width: 300, height: 150 }}
+          initialSize={{ width: 400, height: 200 }}
+          disableResize={true}
         >
           <div className="p-4 bg-white flex flex-col gap-4">
             <div className="flex flex-col gap-2">

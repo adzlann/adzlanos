@@ -104,19 +104,34 @@ export function Desktop() {
 
         {/* Windows */}
         {showAboutWindow && (
-          <AboutWindow onClose={() => setShowAboutWindow(false)} />
+          <AboutWindow 
+            id="about"
+            onClose={() => setShowAboutWindow(false)} 
+          />
         )}
         {showFinderWindow && (
-          <FinderWindow onClose={() => setShowFinderWindow(false)} />
+          <FinderWindow 
+            id="finder"
+            onClose={() => setShowFinderWindow(false)} 
+          />
         )}
         {showTextEdit && (
-          <TextEditWindow onClose={() => setShowTextEdit(false)} />
+          <TextEditWindow 
+            id="textedit"
+            onClose={() => setShowTextEdit(false)} 
+          />
         )}
         {showMinesweeper && (
-          <MinesweeperWindow onClose={() => setShowMinesweeper(false)} />
+          <MinesweeperWindow 
+            id="minesweeper"
+            onClose={() => setShowMinesweeper(false)} 
+          />
         )}
         {showInternetExplorer && (
-          <InternetExplorerWindow onClose={() => setShowInternetExplorer(false)} />
+          <InternetExplorerWindow 
+            id="internetexplorer"
+            onClose={() => setShowInternetExplorer(false)} 
+          />
         )}
       </div>
     </div>

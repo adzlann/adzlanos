@@ -15,6 +15,7 @@ interface File {
 
 interface ApplicationsWindowProps {
   onClose: () => void;
+  id: string;
 }
 
 const applicationFiles: File[] = [
@@ -44,7 +45,7 @@ const applicationFiles: File[] = [
   }
 ];
 
-export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
+export function ApplicationsWindow({ onClose, id }: ApplicationsWindowProps) {
   const [showTextEdit, setShowTextEdit] = useState(false);
   const [showMinesweeper, setShowMinesweeper] = useState(false);
   const [showInternetExplorer, setShowInternetExplorer] = useState(false);
@@ -66,6 +67,7 @@ export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
   return (
     <>
       <Window 
+        id={id}
         title="Applications" 
         onClose={onClose}
         initialPosition={{ x: 150, y: 70 }}
@@ -118,15 +120,24 @@ export function ApplicationsWindow({ onClose }: ApplicationsWindowProps) {
       </Window>
 
       {showTextEdit && (
-        <TextEditWindow onClose={() => setShowTextEdit(false)} />
+        <TextEditWindow 
+          id={`${id}-textedit`}
+          onClose={() => setShowTextEdit(false)} 
+        />
       )}
 
       {showMinesweeper && (
-        <MinesweeperWindow onClose={() => setShowMinesweeper(false)} />
+        <MinesweeperWindow 
+          id={`${id}-minesweeper`}
+          onClose={() => setShowMinesweeper(false)} 
+        />
       )}
 
       {showInternetExplorer && (
-        <InternetExplorerWindow onClose={() => setShowInternetExplorer(false)} />
+        <InternetExplorerWindow 
+          id={`${id}-internetexplorer`}
+          onClose={() => setShowInternetExplorer(false)} 
+        />
       )}
     </>
   );

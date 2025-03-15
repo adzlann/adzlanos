@@ -2,11 +2,13 @@ import { Window } from './Window';
 
 interface AboutWindowProps {
   onClose: () => void;
+  id: string;
 }
 
-export function AboutWindow({ onClose }: AboutWindowProps) {
+export function AboutWindow({ onClose, id }: AboutWindowProps) {
   return (
     <Window
+      id={id}
       title="About This Computer"
       onClose={onClose}
       initialSize={{ width: 400, height: 250 }}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useWindow } from '../contexts/WindowContext';
 
 type ResizeDirection = 'e' | 'w' | 'se' | 'sw' | 's' | null;
 
@@ -10,6 +11,7 @@ interface WindowProps {
   onClose: () => void;
   disableResize?: boolean;
   className?: string;
+  id: string;
 }
 
 export function Window({ 
@@ -19,7 +21,8 @@ export function Window({
   initialSize = { width: 400, height: 300 },
   onClose,
   disableResize = false,
-  className = ''
+  className = '',
+  id
 }: WindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
@@ -28,6 +31,15 @@ export function Window({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0, left: 0 });
   const windowRef = useRef<HTMLDivElement>(null);
+  const hasInitializedRef = useRef(false);
+  const { bringToFront, getZIndex } = useWindow();
+
+  useEffect(() => {
+    if (!hasInitializedRef.current) {
+      bringToFront(id);
+      hasInitializedRef.current = true;
+    }
+  }, [id, bringToFront]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -36,6 +48,7 @@ export function Window({
         x: e.clientX - position.x,
         y: e.clientY - position.y
       });
+      bringToFront(id);
     }
   };
 
@@ -120,6 +133,7 @@ export function Window({
         top: position.y,
         width: size.width,
         height: size.height,
+        zIndex: getZIndex(id),
       }}
     >
       {/* Title Bar */}
@@ -169,4 +183,4 @@ export function Window({
       )}
     </div>
   );
-} 
+}
