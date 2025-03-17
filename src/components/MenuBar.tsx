@@ -78,28 +78,28 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
   };
 
   return (
-    <div className="h-7 bg-white border-b border-black flex items-center justify-between px-1 font-vt323">
-      <div className="flex items-center space-x-1">
+    <div className="h-7 bg-white border-b border-black flex items-center justify-between px-4 font-chicago">
+      <div className="flex items-center space-x-2">
         <button
-          className="px-2 hover:bg-black hover:text-white"
+          className="px-2 hover:bg-gray-200"
           onClick={handleAppleMenuClick}
         >
           <img src={appleIcon} alt="Apple" className="w-4 h-4" />
         </button>
         <button 
-          className="text-base hover:bg-black hover:text-white px-2 cursor-pointer"
+          className="text-sm hover:bg-gray-200 px-2 cursor-pointer font-semibold"
           onClick={handleFileMenuClick}
         >
           File
         </button>
         <button 
-          className="text-base hover:bg-black hover:text-white px-2 cursor-pointer"
+          className="text-sm hover:bg-gray-200 px-2 cursor-pointer font-semibold"
           onClick={handleEditMenuClick}
         >
           Edit
         </button>
-        <span className="text-base hover:bg-black hover:text-white px-2 cursor-pointer">View</span>
-        <span className="text-base hover:bg-black hover:text-white px-2 cursor-pointer">Special</span>
+        <span className="text-sm hover:bg-gray-200 px-2 cursor-pointer font-semibold">View</span>
+        <span className="text-sm hover:bg-gray-200 px-2 cursor-pointer font-semibold">Special</span>
       </div>
         
       {isAppleMenuOpen && (
@@ -112,12 +112,12 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
             <div className="py-1">
               <button 
                 onClick={handleAboutClick}
-                className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white border-b border-gray-200"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200 border-b border-gray-200"
               >
                 About This Computer...
               </button>
               <div className="mt-1 border-b border-gray-200" />
-              <button className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white">
+              <button className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200">
                 Control Panel
               </button>
               
@@ -127,7 +127,7 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
                 <button
                   key={app.id}
                   onClick={() => handleAppClick(app.id)}
-                  className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white flex items-center gap-2"
+                  className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200 flex items-center gap-2"
                 >
                   <span>{app.icon}</span>
                   <span>{app.name}</span>
@@ -148,33 +148,33 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
             <div className="py-1">
               <button 
                 onClick={handleNewFinderWindow}
-                className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white border-b border-gray-200"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200 border-b border-gray-200"
               >
                 New Finder Window
               </button>
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed"
               >
                 New Folder
               </button>
               <div className="mt-1 border-b border-gray-200" />
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed"
               >
                 Move to Trash
               </button>
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed"
               >
                 Empty Trash...
               </button>
               <div className="mt-1 border-b border-gray-200" />
               <button 
                 onClick={handleClickOutside}
-                className="w-full text-left px-4 py-1 text-base font-vt323 hover:bg-black hover:text-white"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200"
               >
                 Close
               </button>
@@ -193,39 +193,39 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
             <div className="py-1">
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed border-b border-gray-200"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed border-b border-gray-200"
               >
                 Undo
               </button>
               <div className="mt-1 border-b border-gray-200" />
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed"
               >
                 Cut
               </button>
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed"
               >
                 Copy
               </button>
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed"
               >
                 Paste
               </button>
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed border-b border-gray-200"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed border-b border-gray-200"
               >
                 Clear
               </button>
               <div className="mt-1 border-b border-gray-200" />
               <button 
                 disabled
-                className="w-full text-left px-4 py-1 text-base font-vt323 text-gray-400 cursor-not-allowed"
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold text-gray-400 cursor-not-allowed"
               >
                 Select All
               </button>
@@ -234,7 +234,7 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
         </>
       )}
 
-      <div className="text-base">
+      <div className="text-sm font-semibold">
         {currentTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
       </div>
     </div>

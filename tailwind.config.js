@@ -8,7 +8,7 @@ export default {
     extend: {
       fontFamily: {
         'vt323': ['VT323', 'monospace'],
-        'chicago': ['Chicago', 'system-ui'],
+        'chicago': ['"Chicago FLF"', 'system-ui', 'sans-serif'],
       },
     },
   },

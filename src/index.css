@@ -53,15 +53,17 @@
 
 /* System 7 specific styles */
 @font-face {
-  font-family: 'Chicago';
-  src: url('https://unpkg.com/chicago-12@1.0.0/Chicago-12.ttf') format('truetype');
+  font-family: 'Chicago FLF';
+  src: url('/fonts/ChicagoFLF.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: "VT323", monospace;
+  font-family: "Chicago FLF", system-ui, sans-serif;
   -webkit-font-smoothing: none;
   font-smooth: never;
   cursor: default;

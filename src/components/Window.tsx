@@ -147,9 +147,9 @@ export function Window({
         <div className="w-5 flex items-center justify-center">
           {icon}
         </div>
-        <span className="text-white text-base font-vt323 select-none">{title}</span>
+        <span className="text-white text-base font-chicago select-none">{title}</span>
         <button 
-          className="w-5 h-4 bg-white border border-black text-black text-base font-vt323 flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300"
+          className="w-5 h-4 bg-white border border-black text-black text-base font-chicago flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300"
           onClick={onClose}
         >
           ×
@@ -157,7 +157,7 @@ export function Window({
       </div>
 
       {/* Window Content */}
-      <div className={`absolute inset-0 top-6 font-vt323 ${className}`}>
+      <div className={`absolute inset-0 top-6 font-chicago ${className}`}>
         {children}
       </div>
 
