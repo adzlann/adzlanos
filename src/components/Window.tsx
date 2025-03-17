@@ -122,7 +122,7 @@ export function Window({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dragOffset, resizeStart, position.y, size.height, size.width]);
+  }, [isDragging, isResizing, dragOffset, resizeStart, position.y, position.x, size.height, size.width]);
 
   return (
     <div
