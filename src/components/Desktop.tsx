@@ -11,6 +11,7 @@ import textEditIcon from '../assets/TextEdit.png';
 import macintoshIcon from '../assets/macintosh.png';
 import mineIcon from '../assets/mine.png';
 import explorerIcon from '../assets/explorer.png';
+import thunderWallpaper from '../assets/thunder_wallpaper.jpg';
 
 interface Application {
   id: string;
@@ -30,19 +31,19 @@ const defaultApps: Application[] = [
     id: 'textedit',
     name: 'TextEdit',
     icon: <img src={textEditIcon} alt="TextEdit" className="w-12 h-12" />,
-    position: { x: window.innerWidth - 150, y: 100 }
+    position: { x: window.innerWidth - 150, y: 105 }
   },
   {
     id: 'minesweeper',
     name: 'Minesweeper',
     icon: <img src={mineIcon} alt="Minesweeper" className="w-12 h-12" />,
-    position: { x: window.innerWidth - 150, y: 200 }
+    position: { x: window.innerWidth - 150, y: 210 }
   },
   {
     id: 'internetexplorer',
     name: 'Internet Explorer',
     icon: <img src={explorerIcon} alt="Internet Explorer" className="w-12 h-12" />,
-    position: { x: window.innerWidth - 150, y: 300 }
+    position: { x: window.innerWidth - 150, y: 315 }
   }
 ];
 
@@ -102,8 +103,13 @@ export function Desktop() {
         onAppLaunch={handleAppLaunch}
       />
       <div 
-        className="flex-1 bg-[#000033] relative overflow-hidden"
+        className="flex-1 relative overflow-hidden"
         onClick={handleDesktopClick}
+        style={{
+          backgroundImage: `url(${thunderWallpaper})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
       >
         {/* Desktop Icons */}
         {apps.map((app) => (

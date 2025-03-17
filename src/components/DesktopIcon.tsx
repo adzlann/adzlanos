@@ -43,10 +43,10 @@ export function DesktopIcon({ name, icon, position, onDoubleClick }: DesktopIcon
           )}
         </div>
         <div 
-          className={`text-center text-[14px] leading-tight px-1 whitespace-nowrap font-chicago mt-2 ${
-            isSelected ? 'text-white' : 'text-white'
+          className={`text-center text-[14px] leading-tight px-1 whitespace-nowrap font-chicago mt-2 bg-white text-black ${
+            isSelected ? 'bg-gray-500 text-white' : ''
           }`}
-          style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.5)' }}
+          style={{ textShadow: isSelected ? '1px 1px 1px rgba(0,0,0,0.5)' : 'none' }}
         >
           {truncateText(name, 12)}
         </div>
