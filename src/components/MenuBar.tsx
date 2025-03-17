@@ -7,6 +7,7 @@ import explorerIcon from '../assets/explorer.png'
 interface MenuBarProps {
   currentTime: Date;
   onAboutClick: () => void;
+  onControlPanelsClick: () => void;
   onAppLaunch?: (id: string) => void;
 }
 
@@ -28,7 +29,7 @@ const applications = [
   }
 ];
 
-export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps) {
+export function MenuBar({ currentTime, onAboutClick, onControlPanelsClick, onAppLaunch }: MenuBarProps) {
   const [isAppleMenuOpen, setIsAppleMenuOpen] = useState(false);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
@@ -117,8 +118,14 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
                 About This Computer...
               </button>
               <div className="mt-1 border-b border-gray-200" />
-              <button className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200">
-                Control Panel
+              <button 
+                onClick={() => {
+                  onControlPanelsClick();
+                  setIsAppleMenuOpen(false);
+                }}
+                className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200"
+              >
+                Control Panels
               </button>
               
               {/* Applications Section */}

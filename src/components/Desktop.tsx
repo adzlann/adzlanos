@@ -6,12 +6,13 @@ import { FinderWindow } from './FinderWindow';
 import { TextEditWindow } from './TextEditWindow';
 import { MinesweeperWindow } from './MinesweeperWindow';
 import { InternetExplorerWindow } from './InternetExplorerWindow';
+import { ControlPanelsWindow } from './ControlPanelsWindow';
 import { useWindow } from '../contexts/WindowContext';
 import textEditIcon from '../assets/TextEdit.png';
 import macintoshIcon from '../assets/macintosh.png';
 import mineIcon from '../assets/mine.png';
 import explorerIcon from '../assets/explorer.png';
-import thunderWallpaper from '../assets/thunder_wallpaper.jpg';
+import thunderWallpaper from '../assets/wallpaper/thunder_wallpaper.jpg';
 
 interface Application {
   id: string;
@@ -54,6 +55,8 @@ export function Desktop() {
   const [showTextEdit, setShowTextEdit] = useState(false);
   const [showMinesweeper, setShowMinesweeper] = useState(false);
   const [showInternetExplorer, setShowInternetExplorer] = useState(false);
+  const [showControlPanels, setShowControlPanels] = useState(false);
+  const [currentWallpaper, setCurrentWallpaper] = useState(thunderWallpaper);
   const [apps] = useState<Application[]>(defaultApps);
   const { bringToFront } = useWindow();
 
@@ -100,13 +103,17 @@ export function Desktop() {
           setShowAboutWindow(true);
           bringToFront('about');
         }}
+        onControlPanelsClick={() => {
+          setShowControlPanels(true);
+          bringToFront('controlpanels');
+        }}
         onAppLaunch={handleAppLaunch}
       />
       <div 
         className="flex-1 relative overflow-hidden"
         onClick={handleDesktopClick}
         style={{
-          backgroundImage: `url(${thunderWallpaper})`,
+          backgroundImage: `url(${currentWallpaper})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -151,6 +158,13 @@ export function Desktop() {
           <InternetExplorerWindow 
             id="internetexplorer"
             onClose={() => setShowInternetExplorer(false)}
+          />
+        )}
+        {showControlPanels && (
+          <ControlPanelsWindow 
+            id="controlpanels"
+            onClose={() => setShowControlPanels(false)}
+            onWallpaperChange={(wallpaper) => setCurrentWallpaper(wallpaper)}
           />
         )}
       </div>
