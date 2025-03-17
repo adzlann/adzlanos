@@ -12,7 +12,6 @@ interface WindowProps {
   disableResize?: boolean;
   className?: string;
   id: string;
-  icon?: React.ReactNode;
 }
 
 export function Window({ 
@@ -23,8 +22,7 @@ export function Window({
   onClose,
   disableResize = false,
   className = '',
-  id,
-  icon
+  id
 }: WindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
@@ -129,7 +127,7 @@ export function Window({
   return (
     <div
       ref={windowRef}
-      className="fixed bg-white border border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+      className="fixed bg-[#E6E6E6] border border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
       style={{
         left: position.x,
         top: position.y,
@@ -141,19 +139,35 @@ export function Window({
     >
       {/* Title Bar */}
       <div 
-        className="h-6 bg-[linear-gradient(90deg,_#000_50%,_#000_50%)] bg-[length:2px_2px] cursor-move flex items-center justify-between px-1"
+        className="h-6 bg-[#E6E6E6] border-b border-black cursor-move flex items-center px-1 relative overflow-hidden"
         onMouseDown={handleMouseDown}
       >
-        <div className="w-5 flex items-center justify-center">
-          {icon}
+        {/* Background lines - positioned to avoid close button */}
+        <div className="absolute inset-0 pointer-events-none" style={{ left: '32px' }}>
+          {/* Lines with significant padding to show only in middle */}
+          <div className="w-full h-full flex items-center">
+            <div className="w-full h-[14px] bg-[linear-gradient(0deg,_#000_1px,_transparent_1px)] bg-[length:100%_2px]" />
+          </div>
         </div>
-        <span className="text-white text-base font-chicago select-none">{title}</span>
-        <button 
-          className="w-5 h-4 bg-white border border-black text-black text-base font-chicago flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300"
-          onClick={onClose}
-        >
-          ×
-        </button>
+
+        {/* Close button area with clean background */}
+        <div className="z-10 bg-[#E6E6E6] relative">
+          <button 
+            className="w-5 h-4 bg-white border border-black text-black text-base font-chicago flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300 mr-2"
+            onClick={onClose}
+          />
+        </div>
+
+        {/* Title with clean background */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          {/* Title text with clean background */}
+          <div className="z-10 px-4 bg-[#E6E6E6]">
+            <span className="font-chicago text-base select-none">{title}</span>
+          </div>
+        </div>
+
+        {/* Spacer for proper layout */}
+        <div className="flex-1" />
       </div>
 
       {/* Window Content */}
