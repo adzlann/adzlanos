@@ -5,6 +5,8 @@ import { MinesweeperWindow } from './MinesweeperWindow';
 import { InternetExplorerWindow } from './InternetExplorerWindow';
 import { useWindow } from '../contexts/WindowContext';
 import textEditIcon from '../assets/TextEdit.png';
+import mineIcon from '../assets/mine.png';
+import explorerIcon from '../assets/explorer.png';
 
 interface File {
   id: string;
@@ -32,7 +34,7 @@ const applicationFiles: File[] = [
   {
     id: 'minesweeper',
     name: 'Minesweeper',
-    icon: '💣',
+    icon: <img src={mineIcon} alt="Minesweeper" className="w-6 h-6" />,
     type: 'Application',
     size: '--',
     modified: '--'
@@ -40,7 +42,7 @@ const applicationFiles: File[] = [
   {
     id: 'internetexplorer',
     name: 'Internet Explorer',
-    icon: '🌐',
+    icon: <img src={explorerIcon} alt="Internet Explorer" className="w-6 h-6" />,
     type: 'Application',
     size: '--',
     modified: '--'

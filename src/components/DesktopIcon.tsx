@@ -21,6 +21,10 @@ export function DesktopIcon({ name, icon, position, onDoubleClick }: DesktopIcon
     setIsSelected(!isSelected);
   };
 
+  const truncateText = (text: string, maxLength: number) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  };
+
   return (
     <div
       className={`desktop-icon absolute flex flex-col items-center w-32 cursor-pointer ${
@@ -44,7 +48,7 @@ export function DesktopIcon({ name, icon, position, onDoubleClick }: DesktopIcon
           }`}
           style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.5)' }}
         >
-          {name}
+          {truncateText(name, 12)}
         </div>
       </div>
     </div>

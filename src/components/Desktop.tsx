@@ -9,6 +9,8 @@ import { InternetExplorerWindow } from './InternetExplorerWindow';
 import { useWindow } from '../contexts/WindowContext';
 import textEditIcon from '../assets/TextEdit.png';
 import macintoshIcon from '../assets/macintosh.png';
+import mineIcon from '../assets/mine.png';
+import explorerIcon from '../assets/explorer.png';
 
 interface Application {
   id: string;
@@ -22,25 +24,25 @@ const defaultApps: Application[] = [
     id: 'macintoshHd',
     name: 'Macintosh HD',
     icon: <img src={macintoshIcon} alt="Macintosh HD" className="w-12 h-12" />,
-    position: { x: window.innerWidth - 150, y: 40 }
+    position: { x: window.innerWidth - 150, y: 0 }
   },
   {
     id: 'textedit',
     name: 'TextEdit',
     icon: <img src={textEditIcon} alt="TextEdit" className="w-12 h-12" />,
-    position: { x: window.innerWidth - 150, y: 160 }
+    position: { x: window.innerWidth - 150, y: 100 }
   },
   {
     id: 'minesweeper',
     name: 'Minesweeper',
-    icon: <span className="text-4xl">💣</span>,
-    position: { x: window.innerWidth - 150, y: 280 }
+    icon: <img src={mineIcon} alt="Minesweeper" className="w-12 h-12" />,
+    position: { x: window.innerWidth - 150, y: 200 }
   },
   {
     id: 'internetexplorer',
     name: 'Internet Explorer',
-    icon: <span className="text-4xl">🌐</span>,
-    position: { x: window.innerWidth - 150, y: 400 }
+    icon: <img src={explorerIcon} alt="Internet Explorer" className="w-12 h-12" />,
+    position: { x: window.innerWidth - 150, y: 300 }
   }
 ];
 

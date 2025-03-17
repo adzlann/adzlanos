@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import appleIcon from '../assets/apple.png'
 import textEditIcon from '../assets/TextEdit.png'
+import mineIcon from '../assets/mine.png'
+import explorerIcon from '../assets/explorer.png'
 
 interface MenuBarProps {
   currentTime: Date;
@@ -17,12 +19,12 @@ const applications = [
   {
     id: 'minesweeper',
     name: 'Minesweeper',
-    icon: '💣',
+    icon: <img src={mineIcon} alt="Minesweeper" className="w-5 h-5" />,
   },
   {
     id: 'internetexplorer',
     name: 'Internet Explorer',
-    icon: '🌐',
+    icon: <img src={explorerIcon} alt="Internet Explorer" className="w-5 h-5" />,
   }
 ];
 
