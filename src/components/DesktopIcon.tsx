@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 interface DesktopIconProps {
   name: string;
-  icon: string;
+  icon: string | React.ReactNode;
   position: { x: number; y: number };
   onDoubleClick: () => void;
 }
@@ -23,19 +23,23 @@ export function DesktopIcon({ name, icon, position, onDoubleClick }: DesktopIcon
 
   return (
     <div
-      className={`desktop-icon absolute flex flex-col items-center w-24 cursor-pointer ${
+      className={`desktop-icon absolute flex flex-col items-center w-32 cursor-pointer ${
         isSelected ? 'selected' : ''
       }`}
       style={{ left: position.x, top: position.y }}
       onClick={handleClick}
       onDoubleClick={onDoubleClick}
     >
-      <div className={`p-1 rounded ${isSelected ? 'bg-gray-500' : ''}`}>
-        <div className="w-12 h-12 flex items-center justify-center text-3xl mb-1">
-          {icon}
+      <div className={`p-2 rounded flex flex-col items-center ${isSelected ? 'bg-gray-500' : ''}`}>
+        <div className="w-16 h-16 flex items-center justify-center">
+          {typeof icon === 'string' ? (
+            <span className="text-4xl">{icon}</span>
+          ) : (
+            icon
+          )}
         </div>
         <div 
-          className={`text-center text-[11px] leading-tight px-1 break-words font-chicago ${
+          className={`text-center text-[14px] leading-tight px-1 whitespace-nowrap font-chicago mt-2 ${
             isSelected ? 'text-white' : 'text-white'
           }`}
           style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.5)' }}

@@ -12,6 +12,7 @@ interface WindowProps {
   disableResize?: boolean;
   className?: string;
   id: string;
+  icon?: React.ReactNode;
 }
 
 export function Window({ 
@@ -22,7 +23,8 @@ export function Window({
   onClose,
   disableResize = false,
   className = '',
-  id
+  id,
+  icon
 }: WindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
@@ -142,7 +144,9 @@ export function Window({
         className="h-6 bg-[linear-gradient(90deg,_#000_50%,_#000_50%)] bg-[length:2px_2px] cursor-move flex items-center justify-between px-1"
         onMouseDown={handleMouseDown}
       >
-        <div className="w-5" /> {/* Spacer for visual balance */}
+        <div className="w-5 flex items-center justify-center">
+          {icon}
+        </div>
         <span className="text-white text-base font-vt323 select-none">{title}</span>
         <button 
           className="w-5 h-4 bg-white border border-black text-black text-base font-vt323 flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300"

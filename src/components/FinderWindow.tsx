@@ -3,11 +3,15 @@ import { useState } from 'react';
 import { ApplicationsWindow } from './ApplicationsWindow';
 import { DocumentsWindow } from './DocumentsWindow';
 import { TrashWindow } from './TrashWindow';
+import applicationsIcon from '../assets/applications-folder.png';
+import documentsIcon from '../assets/folder-documents.png';
+import trashIcon from '../assets/trash.png';
+import macintoshIcon from '../assets/macintosh.png';
 
 interface File {
   id: string;
   name: string;
-  icon: string;
+  icon: string | React.ReactNode;
   type: 'file' | 'folder';
   isSystem?: boolean;
   size?: string;
@@ -23,7 +27,7 @@ const defaultFiles: File[] = [
   {
     id: 'applications',
     name: 'Applications',
-    icon: '📁',
+    icon: <img src={applicationsIcon} alt="Applications" className="w-6 h-6" />,
     type: 'folder',
     isSystem: true,
     size: '--',
@@ -32,7 +36,7 @@ const defaultFiles: File[] = [
   {
     id: 'documents',
     name: 'Documents',
-    icon: '📁',
+    icon: <img src={documentsIcon} alt="Documents" className="w-6 h-6" />,
     type: 'folder',
     isSystem: true,
     size: '--',
@@ -41,7 +45,7 @@ const defaultFiles: File[] = [
   {
     id: 'trash',
     name: 'Trash',
-    icon: '🗑️',
+    icon: <img src={trashIcon} alt="Trash" className="w-6 h-6" />,
     type: 'folder',
     isSystem: true,
     size: '--',
@@ -68,9 +72,7 @@ export function FinderWindow({ onClose, id }: FinderWindowProps) {
 
   // Update trash icon based on content
   const getTrashIcon = () => {
-    const trashedDocs = localStorage.getItem('trashedDocuments');
-    const hasItems = trashedDocs && JSON.parse(trashedDocs).length > 0;
-    return hasItems ? '🗑️' : '🗑️';
+    return <img src={trashIcon} alt="Trash" className="w-6 h-6" />;
   };
 
   const files = defaultFiles.map(file => 
@@ -85,6 +87,7 @@ export function FinderWindow({ onClose, id }: FinderWindowProps) {
         onClose={onClose}
         initialPosition={{ x: 100, y: 50 }}
         initialSize={{ width: 600, height: 400 }}
+        icon={<img src={macintoshIcon} alt="Macintosh HD" className="w-4 h-4" />}
       >
         <div className="h-full flex flex-col bg-white">
           {/* Navigation Bar */}
@@ -114,7 +117,11 @@ export function FinderWindow({ onClose, id }: FinderWindowProps) {
                 onDoubleClick={() => handleDoubleClick(file)}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">{file.icon}</span>
+                  {typeof file.icon === 'string' ? (
+                    <span className="text-xl">{file.icon}</span>
+                  ) : (
+                    file.icon
+                  )}
                   <span className="font-chicago text-sm">{file.name}</span>
                 </div>
                 <div className="font-chicago text-sm self-center">{file.type}</div>

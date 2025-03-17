@@ -1,6 +1,7 @@
 import { Window } from './Window';
 import { useState } from 'react';
 import { TextEditWindow } from './TextEditWindow';
+import textEditIcon from '../assets/TextEdit.png';
 
 interface File {
   id: string;
@@ -20,9 +21,10 @@ interface SavedDocument {
 
 interface DocumentsWindowProps {
   onClose: () => void;
+  id?: string;
 }
 
-export function DocumentsWindow({ onClose }: DocumentsWindowProps) {
+export function DocumentsWindow({ onClose, id = 'documents' }: DocumentsWindowProps) {
   const [showTextEdit, setShowTextEdit] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<File | null>(null);
 
@@ -72,6 +74,7 @@ export function DocumentsWindow({ onClose }: DocumentsWindowProps) {
   return (
     <>
       <Window 
+        id={id}
         title="Documents" 
         onClose={onClose}
         initialPosition={{ x: 150, y: 70 }}
@@ -105,7 +108,7 @@ export function DocumentsWindow({ onClose }: DocumentsWindowProps) {
                 onDoubleClick={() => handleDoubleClick(file)}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">📄</span>
+                  <img src={textEditIcon} alt="TextEdit Document" className="w-5 h-5" />
                   <span className="font-chicago text-sm">{file.name}</span>
                 </div>
                 <div className="font-chicago text-sm self-center">{file.type}</div>
@@ -138,6 +141,7 @@ export function DocumentsWindow({ onClose }: DocumentsWindowProps) {
 
       {showTextEdit && selectedDocument && (
         <TextEditWindow
+          id={`${id}-document-${selectedDocument.id}`}
           onClose={() => {
             setShowTextEdit(false);
             setSelectedDocument(null);

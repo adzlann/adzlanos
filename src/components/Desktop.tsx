@@ -7,11 +7,13 @@ import { TextEditWindow } from './TextEditWindow';
 import { MinesweeperWindow } from './MinesweeperWindow';
 import { InternetExplorerWindow } from './InternetExplorerWindow';
 import { useWindow } from '../contexts/WindowContext';
+import textEditIcon from '../assets/TextEdit.png';
+import macintoshIcon from '../assets/macintosh.png';
 
 interface Application {
   id: string;
   name: string;
-  icon: string;
+  icon: string | React.ReactNode;
   position: { x: number; y: number };
 }
 
@@ -19,26 +21,26 @@ const defaultApps: Application[] = [
   {
     id: 'macintoshHd',
     name: 'Macintosh HD',
-    icon: '💽',
-    position: { x: window.innerWidth - 100, y: 20 }
+    icon: <img src={macintoshIcon} alt="Macintosh HD" className="w-12 h-12" />,
+    position: { x: window.innerWidth - 150, y: 40 }
   },
   {
     id: 'textedit',
     name: 'TextEdit',
-    icon: '📝',
-    position: { x: window.innerWidth - 100, y: 100 }
+    icon: <img src={textEditIcon} alt="TextEdit" className="w-12 h-12" />,
+    position: { x: window.innerWidth - 150, y: 160 }
   },
   {
     id: 'minesweeper',
     name: 'Minesweeper',
-    icon: '💣',
-    position: { x: window.innerWidth - 100, y: 180 }
+    icon: <span className="text-4xl">💣</span>,
+    position: { x: window.innerWidth - 150, y: 280 }
   },
   {
     id: 'internetexplorer',
     name: 'Internet Explorer',
-    icon: '🌐',
-    position: { x: window.innerWidth - 100, y: 260 }
+    icon: <span className="text-4xl">🌐</span>,
+    position: { x: window.innerWidth - 150, y: 400 }
   }
 ];
 

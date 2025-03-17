@@ -4,11 +4,12 @@ import { TextEditWindow } from './TextEditWindow';
 import { MinesweeperWindow } from './MinesweeperWindow';
 import { InternetExplorerWindow } from './InternetExplorerWindow';
 import { useWindow } from '../contexts/WindowContext';
+import textEditIcon from '../assets/TextEdit.png';
 
 interface File {
   id: string;
   name: string;
-  icon: string;
+  icon: string | React.ReactNode;
   type: string;
   size: string;
   modified: string;
@@ -23,7 +24,7 @@ const applicationFiles: File[] = [
   {
     id: 'textedit',
     name: 'TextEdit',
-    icon: '📝',
+    icon: <img src={textEditIcon} alt="TextEdit" className="w-6 h-6" />,
     type: 'Application',
     size: '--',
     modified: '--'

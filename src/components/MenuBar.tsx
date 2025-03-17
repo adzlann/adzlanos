@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import appleIcon from '../assets/apple.png'
+import textEditIcon from '../assets/TextEdit.png'
 
 interface MenuBarProps {
   currentTime: Date;
@@ -10,7 +12,7 @@ const applications = [
   {
     id: 'textedit',
     name: 'TextEdit',
-    icon: '📝',
+    icon: <img src={textEditIcon} alt="TextEdit" className="w-5 h-5" />,
   },
   {
     id: 'minesweeper',
@@ -80,7 +82,7 @@ export function MenuBar({ currentTime, onAboutClick, onAppLaunch }: MenuBarProps
           className="px-2 hover:bg-black hover:text-white"
           onClick={handleAppleMenuClick}
         >
-          🍎
+          <img src={appleIcon} alt="Apple" className="w-4 h-4" />
         </button>
         <button 
           className="text-base hover:bg-black hover:text-white px-2 cursor-pointer"
