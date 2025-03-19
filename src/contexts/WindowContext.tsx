@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 interface WindowContextType {
   bringToFront: (id: string) => void;
@@ -11,6 +11,7 @@ interface WindowContextType {
   getActiveWindow: () => string | null;
   onWindowClose: (callback: (id: string) => void) => () => void;
   reopenWindow: (id: string) => void;
+  hasLoadedInitialState: boolean;
 }
 
 const WindowContext = createContext<WindowContextType | null>(null);
@@ -18,8 +19,38 @@ const WindowContext = createContext<WindowContextType | null>(null);
 export function WindowProvider({ children }: { children: React.ReactNode }) {
   const [windowOrder, setWindowOrder] = useState<string[]>([]);
   const [minimizedWindows, setMinimizedWindows] = useState<string[]>([]);
-  const [closedWindows, setClosedWindows] = useState<string[]>([]);
+  const [closedWindows, setClosedWindows] = useState<string[]>(['finder', 'textedit', 'minesweeper', 'internetexplorer', 'about', 'controlpanels']);
   const [closeListeners] = useState<Set<(id: string) => void>>(() => new Set());
+  const [hasLoadedInitialState, setHasLoadedInitialState] = useState(false);
+
+  // Load window state from localStorage on initial render
+  useEffect(() => {
+    const savedState = localStorage.getItem('window_state');
+    if (savedState) {
+      try {
+        const { minimizedWindows: savedMinimized, closedWindows: savedClosed, windowOrder: savedOrder } = JSON.parse(savedState);
+        if (savedMinimized) setMinimizedWindows(savedMinimized);
+        if (savedClosed) setClosedWindows(savedClosed);
+        if (savedOrder) setWindowOrder(savedOrder);
+      } catch (error) {
+        console.error('Error restoring window state:', error);
+      }
+    }
+    setHasLoadedInitialState(true);
+  }, []);
+
+  // Save window state to localStorage whenever it changes
+  useEffect(() => {
+    // Only save if we've loaded the initial state, to avoid overwriting with default values
+    if (hasLoadedInitialState) {
+      const windowState = {
+        minimizedWindows,
+        closedWindows,
+        windowOrder
+      };
+      localStorage.setItem('window_state', JSON.stringify(windowState));
+    }
+  }, [minimizedWindows, closedWindows, windowOrder, hasLoadedInitialState]);
 
   const bringToFront = useCallback((id: string) => {
     setWindowOrder(prev => {
@@ -97,7 +128,8 @@ export function WindowProvider({ children }: { children: React.ReactNode }) {
       isWindowOpen,
       getActiveWindow,
       onWindowClose,
-      reopenWindow
+      reopenWindow,
+      hasLoadedInitialState
     }}>
       {children}
     </WindowContext.Provider>

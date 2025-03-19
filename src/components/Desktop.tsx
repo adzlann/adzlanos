@@ -58,7 +58,16 @@ export function Desktop() {
   const [showControlPanels, setShowControlPanels] = useState(false);
   const [currentWallpaper, setCurrentWallpaper] = useState(thunderWallpaper);
   const [apps] = useState<Application[]>(defaultApps);
-  const { bringToFront, unminimizeWindow, isWindowMinimized, onWindowClose, reopenWindow, isWindowOpen, minimizeWindow } = useWindow();
+  const { 
+    bringToFront, 
+    unminimizeWindow, 
+    isWindowMinimized, 
+    onWindowClose, 
+    reopenWindow, 
+    isWindowOpen, 
+    minimizeWindow,
+    hasLoadedInitialState
+  } = useWindow();
 
   // Update clock
   useEffect(() => {
@@ -67,6 +76,30 @@ export function Desktop() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Initial load - only show windows that were both open and not minimized
+  useEffect(() => {
+    if (hasLoadedInitialState) {
+      // Make sure we've loaded the window state from localStorage first
+      setShowFinderWindow(isWindowOpen('finder') && !isWindowMinimized('finder'));
+      setShowTextEdit(isWindowOpen('textedit') && !isWindowMinimized('textedit'));
+      setShowMinesweeper(isWindowOpen('minesweeper') && !isWindowMinimized('minesweeper'));
+      setShowInternetExplorer(isWindowOpen('internetexplorer') && !isWindowMinimized('internetexplorer'));
+      setShowAboutWindow(isWindowOpen('about') && !isWindowMinimized('about'));
+      setShowControlPanels(isWindowOpen('controlpanels') && !isWindowMinimized('controlpanels'));
+      
+      // Add to window order if necessary
+      const openWindows = [
+        'finder', 'textedit', 'minesweeper', 'internetexplorer', 'about', 'controlpanels'
+      ].filter(id => isWindowOpen(id));
+      
+      openWindows.forEach(id => {
+        if (isWindowOpen(id)) {
+          bringToFront(id);
+        }
+      });
+    }
+  }, [isWindowOpen, isWindowMinimized, bringToFront, hasLoadedInitialState]);
 
   // Handle window closing
   useEffect(() => {
@@ -97,15 +130,22 @@ export function Desktop() {
   }, [onWindowClose]);
 
   // Sync application visibility with window context state
+  // This effect ensures the window visibility stays in sync with the window state as the user minimizes/restores windows
   useEffect(() => {
-    // Update visibility states based on window context
-    setShowFinderWindow(isWindowOpen('finder') && !isWindowMinimized('finder'));
-    setShowTextEdit(isWindowOpen('textedit') && !isWindowMinimized('textedit'));
-    setShowMinesweeper(isWindowOpen('minesweeper') && !isWindowMinimized('minesweeper'));
-    setShowInternetExplorer(isWindowOpen('internetexplorer') && !isWindowMinimized('internetexplorer'));
-    setShowAboutWindow(isWindowOpen('about') && !isWindowMinimized('about'));
-    setShowControlPanels(isWindowOpen('controlpanels') && !isWindowMinimized('controlpanels'));
-  }, [isWindowOpen, isWindowMinimized]);
+    if (hasLoadedInitialState) {
+      const windowStateChanged = (id: string, setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+        const shouldBeVisible = isWindowOpen(id) && !isWindowMinimized(id);
+        setter(shouldBeVisible);
+      };
+
+      windowStateChanged('finder', setShowFinderWindow);
+      windowStateChanged('textedit', setShowTextEdit);
+      windowStateChanged('minesweeper', setShowMinesweeper);
+      windowStateChanged('internetexplorer', setShowInternetExplorer);
+      windowStateChanged('about', setShowAboutWindow);
+      windowStateChanged('controlpanels', setShowControlPanels);
+    }
+  }, [isWindowOpen, isWindowMinimized, hasLoadedInitialState]);
 
   const handleDesktopClick = () => {
     // Clear any selections when clicking the desktop
