@@ -166,6 +166,8 @@ export function Desktop() {
         if (isWindowMinimized('internetexplorer')) {
           unminimizeWindow('internetexplorer');
         } else if (!isWindowOpen('internetexplorer')) {
+          // Clear session storage when reopening Internet Explorer after it's been closed
+          sessionStorage.removeItem('internetexplorer_state_internetexplorer');
           reopenWindow('internetexplorer');
           setShowInternetExplorer(true);
           bringToFront('internetexplorer');

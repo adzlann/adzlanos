@@ -93,6 +93,8 @@ export function ApplicationsWindow({ onClose, id }: ApplicationsWindowProps) {
           // If window is open but not shown in this view, bring it to front
           bringToFront('internetexplorer');
         } else {
+          // Clear session storage when opening a fresh Internet Explorer window
+          sessionStorage.removeItem('internetexplorer_state_internetexplorer');
           // Otherwise show a new window
           setShowInternetExplorer(true);
           bringToFront('internetexplorer');
@@ -177,7 +179,12 @@ export function ApplicationsWindow({ onClose, id }: ApplicationsWindowProps) {
       {showInternetExplorer && (
         <InternetExplorerWindow 
           id="internetexplorer"
-          onClose={() => setShowInternetExplorer(false)}
+          onClose={() => {
+            // Do not actually close here, just hide from this view
+            setShowInternetExplorer(false);
+            // We minimize instead of closing to preserve state
+            minimizeWindow('internetexplorer');
+          }}
         />
       )}
     </>

@@ -83,10 +83,11 @@ export function MenuBar({ currentTime, onAboutClick, onControlPanelsClick, onApp
         window.dispatchEvent(event);
         minimizeWindow(activeWindowId);
       }
-      // For Minesweeper, we want to actually close it to start fresh next time
-      else if (activeWindowId === 'minesweeper') {
+      // For Minesweeper and Internet Explorer, we want to actually close them to start fresh next time
+      else if (activeWindowId === 'minesweeper' || activeWindowId === 'internetexplorer') {
         // Remove any saved state
         sessionStorage.removeItem(`minesweeper_state_${activeWindowId}`);
+        sessionStorage.removeItem(`internetexplorer_state_${activeWindowId}`);
         closeWindow(activeWindowId);
       }
       // For any other window, minimize to preserve state
