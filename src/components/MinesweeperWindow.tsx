@@ -1,5 +1,6 @@
 import { Window } from './Window';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useWindow } from '../contexts/WindowContext';
 
 interface Cell {
   isMine: boolean;
@@ -21,6 +22,7 @@ export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
   const [minesLeft, setMinesLeft] = useState(MINE_COUNT);
   const [grid, setGrid] = useState<Cell[][]>([]);
   const [faceIcon, setFaceIcon] = useState('🙂');
+  const { isWindowMinimized } = useWindow();
 
   // Initialize game board
   const initializeGrid = () => {
@@ -68,19 +70,100 @@ export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
     return newGrid;
   };
 
-  // Reset game
-  const resetGame = () => {
-    setGrid(initializeGrid());
+  // Save game state when minimized
+  useEffect(() => {
+    // Function to save the current game state
+    const saveGameState = () => {
+      const gameState = {
+        grid,
+        gameOver,
+        gameWon,
+        minesLeft,
+        faceIcon
+      };
+      sessionStorage.setItem(`minesweeper_state_${id}`, JSON.stringify(gameState));
+    };
+
+    // Save state when component mounts
+    saveGameState();
+
+    // Set up interval to check window state
+    let minimizeState = isWindowMinimized(id);
+    const intervalId = setInterval(() => {
+      const newMinimizeState = isWindowMinimized(id);
+      
+      // If window was just minimized, save state
+      if (!minimizeState && newMinimizeState) {
+        saveGameState();
+      }
+      
+      minimizeState = newMinimizeState;
+    }, 100);
+
+    return () => clearInterval(intervalId);
+  }, [id, grid, gameOver, gameWon, minesLeft, faceIcon, isWindowMinimized]);
+
+  // Restore game state when component mounts or is unminimized
+  useEffect(() => {
+    const restoreGameState = () => {
+      const savedState = sessionStorage.getItem(`minesweeper_state_${id}`);
+      if (savedState) {
+        try {
+          const { grid: savedGrid, gameOver: savedGameOver, gameWon: savedGameWon, 
+                 minesLeft: savedMinesLeft, faceIcon: savedFaceIcon } = JSON.parse(savedState);
+          
+          if (savedGrid && savedGrid.length) {
+            setGrid(savedGrid);
+          } else {
+            // Initialize grid if no valid saved grid
+            setGrid(initializeGrid());
+          }
+          
+          if (savedGameOver !== undefined) setGameOver(savedGameOver);
+          if (savedGameWon !== undefined) setGameWon(savedGameWon);
+          if (savedMinesLeft !== undefined) setMinesLeft(savedMinesLeft);
+          if (savedFaceIcon) setFaceIcon(savedFaceIcon);
+        } catch (error) {
+          console.error('Error restoring Minesweeper state:', error);
+          // If restoration fails, initialize a new game
+          setGrid(initializeGrid());
+        }
+      } else {
+        // If no saved state, initialize a new game
+        setGrid(initializeGrid());
+      }
+    };
+
+    // Restore state when component mounts
+    restoreGameState();
+
+    // Also set up a listener for unminimize events
+    let minimizeState = isWindowMinimized(id);
+    const intervalId = setInterval(() => {
+      const newMinimizeState = isWindowMinimized(id);
+      
+      // If window was just unminimized, restore state
+      if (minimizeState && !newMinimizeState) {
+        restoreGameState();
+      }
+      
+      minimizeState = newMinimizeState;
+    }, 100);
+
+    return () => clearInterval(intervalId);
+  }, [id, isWindowMinimized]);
+
+  // Override resetGame to clear saved state
+  const resetGame = useCallback(() => {
     setGameOver(false);
     setGameWon(false);
     setMinesLeft(MINE_COUNT);
     setFaceIcon('🙂');
-  };
-
-  // Initialize game on component mount
-  useEffect(() => {
-    resetGame();
-  }, []);
+    setGrid(initializeGrid());
+    
+    // Clear saved state when starting a new game
+    sessionStorage.removeItem(`minesweeper_state_${id}`);
+  }, [id]);
 
   // Reveal cell and its neighbors if it's empty
   const revealCell = (y: number, x: number, currentGrid: Cell[][]) => {

@@ -8,10 +8,10 @@ interface WindowProps {
   children: React.ReactNode;
   initialPosition?: { x: number; y: number };
   initialSize?: { width: number; height: number };
-  onClose: () => void;
   disableResize?: boolean;
   className?: string;
   id: string;
+  onClose?: () => void;
 }
 
 export function Window({ 
@@ -19,10 +19,10 @@ export function Window({
   children, 
   initialPosition = { x: 100, y: 60 },
   initialSize = { width: 400, height: 300 },
-  onClose,
   disableResize = false,
   className = '',
-  id
+  id,
+  onClose
 }: WindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
@@ -32,7 +32,7 @@ export function Window({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0, left: 0 });
   const windowRef = useRef<HTMLDivElement>(null);
   const hasInitializedRef = useRef(false);
-  const { bringToFront, getZIndex } = useWindow();
+  const { bringToFront, getZIndex, minimizeWindow, isWindowMinimized, isWindowOpen } = useWindow();
 
   useEffect(() => {
     if (!hasInitializedRef.current) {
@@ -124,6 +124,10 @@ export function Window({
     };
   }, [isDragging, isResizing, dragOffset, resizeStart, position.y, position.x, size.height, size.width]);
 
+  if (!isWindowOpen(id) || isWindowMinimized(id)) {
+    return null;
+  }
+
   return (
     <div
       ref={windowRef}
@@ -135,7 +139,16 @@ export function Window({
         height: size.height,
         zIndex: getZIndex(id),
       }}
-      onClick={() => bringToFront(id)}
+      onClick={(e) => {
+        console.log(`Window ${id} clicked:`, e.target, 'Tag:', (e.target as HTMLElement).tagName);
+        if ((e.target as HTMLElement).tagName !== 'INPUT' && 
+            (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+          bringToFront(id);
+        } else {
+          console.log('Skipping bringToFront for input element');
+        }
+      }}
+      data-window-id={id}
     >
       {/* Title Bar */}
       <div 
@@ -156,7 +169,10 @@ export function Window({
             className="w-5 h-4 bg-white border border-black text-black text-base font-chicago flex items-center justify-center leading-none hover:bg-gray-200 active:bg-gray-300 mr-2"
             onClick={(e) => {
               e.stopPropagation();
-              onClose();
+              minimizeWindow(id);
+              if (onClose) {
+                onClose();
+              }
             }}
           />
         </div>
@@ -174,7 +190,18 @@ export function Window({
       </div>
 
       {/* Window Content */}
-      <div className={`absolute inset-0 top-6 font-chicago ${className}`}>
+      <div 
+        className={`absolute inset-0 top-6 font-chicago ${className}`}
+        onClick={(e) => {
+          // Prevent clicks on input elements from triggering window focus
+          if (e.target instanceof HTMLInputElement ||
+              e.target instanceof HTMLTextAreaElement ||
+              e.target instanceof HTMLButtonElement ||
+              e.target instanceof HTMLSelectElement) {
+            e.stopPropagation();
+          }
+        }}
+      >
         {children}
       </div>
 

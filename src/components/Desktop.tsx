@@ -58,7 +58,7 @@ export function Desktop() {
   const [showControlPanels, setShowControlPanels] = useState(false);
   const [currentWallpaper, setCurrentWallpaper] = useState(thunderWallpaper);
   const [apps] = useState<Application[]>(defaultApps);
-  const { bringToFront } = useWindow();
+  const { bringToFront, unminimizeWindow, isWindowMinimized, onWindowClose, reopenWindow, isWindowOpen, minimizeWindow } = useWindow();
 
   // Update clock
   useEffect(() => {
@@ -67,6 +67,34 @@ export function Desktop() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Handle window closing
+  useEffect(() => {
+    const unsubscribe = onWindowClose((id) => {
+      switch (id) {
+        case 'finder':
+          setShowFinderWindow(false);
+          break;
+        case 'textedit':
+          setShowTextEdit(false);
+          break;
+        case 'minesweeper':
+          setShowMinesweeper(false);
+          break;
+        case 'internetexplorer':
+          setShowInternetExplorer(false);
+          break;
+        case 'about':
+          setShowAboutWindow(false);
+          break;
+        case 'controlpanels':
+          setShowControlPanels(false);
+          break;
+      }
+    });
+
+    return unsubscribe;
+  }, [onWindowClose]);
 
   const handleDesktopClick = () => {
     // Clear any selections when clicking the desktop
@@ -77,20 +105,63 @@ export function Desktop() {
   const handleAppLaunch = (id: string) => {
     switch (id) {
       case 'macintoshHd':
-        setShowFinderWindow(true);
-        bringToFront('finder');
+        if (isWindowMinimized('finder')) {
+          unminimizeWindow('finder');
+        } else if (!isWindowOpen('finder')) {
+          reopenWindow('finder');
+          setShowFinderWindow(true);
+          bringToFront('finder');
+        } else if (!showFinderWindow) {
+          setShowFinderWindow(true);
+          bringToFront('finder');
+        } else {
+          bringToFront('finder');
+        }
         break;
       case 'textedit':
-        setShowTextEdit(true);
-        bringToFront('textedit');
+        // For TextEdit, we want a fresh instance when reopening after a close
+        if (isWindowMinimized('textedit')) {
+          unminimizeWindow('textedit');
+        } else if (!isWindowOpen('textedit')) {
+          // Clear any previous session storage to start fresh
+          sessionStorage.removeItem('textEdit_temp_textedit');
+          reopenWindow('textedit');
+          setShowTextEdit(true);
+          bringToFront('textedit');
+        } else if (!showTextEdit) {
+          setShowTextEdit(true);
+          bringToFront('textedit');
+        } else {
+          bringToFront('textedit');
+        }
         break;
       case 'minesweeper':
-        setShowMinesweeper(true);
-        bringToFront('minesweeper');
+        if (isWindowMinimized('minesweeper')) {
+          unminimizeWindow('minesweeper');
+        } else if (!isWindowOpen('minesweeper')) {
+          reopenWindow('minesweeper');
+          setShowMinesweeper(true);
+          bringToFront('minesweeper');
+        } else if (!showMinesweeper) {
+          setShowMinesweeper(true);
+          bringToFront('minesweeper');
+        } else {
+          bringToFront('minesweeper');
+        }
         break;
       case 'internetexplorer':
-        setShowInternetExplorer(true);
-        bringToFront('internetexplorer');
+        if (isWindowMinimized('internetexplorer')) {
+          unminimizeWindow('internetexplorer');
+        } else if (!isWindowOpen('internetexplorer')) {
+          reopenWindow('internetexplorer');
+          setShowInternetExplorer(true);
+          bringToFront('internetexplorer');
+        } else if (!showInternetExplorer) {
+          setShowInternetExplorer(true);
+          bringToFront('internetexplorer');
+        } else {
+          bringToFront('internetexplorer');
+        }
         break;
     }
   };
@@ -100,12 +171,24 @@ export function Desktop() {
       <MenuBar 
         currentTime={currentTime}
         onAboutClick={() => {
-          setShowAboutWindow(true);
-          bringToFront('about');
+          if (isWindowMinimized('about')) {
+            unminimizeWindow('about');
+          } else if (!showAboutWindow) {
+            setShowAboutWindow(true);
+            bringToFront('about');
+          } else {
+            bringToFront('about');
+          }
         }}
         onControlPanelsClick={() => {
-          setShowControlPanels(true);
-          bringToFront('controlpanels');
+          if (isWindowMinimized('controlpanels')) {
+            unminimizeWindow('controlpanels');
+          } else if (!showControlPanels) {
+            setShowControlPanels(true);
+            bringToFront('controlpanels');
+          } else {
+            bringToFront('controlpanels');
+          }
         }}
         onAppLaunch={handleAppLaunch}
       />
@@ -133,37 +216,55 @@ export function Desktop() {
         {showAboutWindow && (
           <AboutWindow 
             id="about"
-            onClose={() => setShowAboutWindow(false)}
+            onClose={() => {
+              // Do not actually close, just minimize
+              minimizeWindow('about');
+            }}
           />
         )}
         {showFinderWindow && (
           <FinderWindow 
             id="finder"
-            onClose={() => setShowFinderWindow(false)}
+            onClose={() => {
+              // Do not actually close, just minimize
+              minimizeWindow('finder');
+            }}
           />
         )}
         {showTextEdit && (
           <TextEditWindow 
             id="textedit"
-            onClose={() => setShowTextEdit(false)}
+            onClose={() => {
+              // TextEdit is already set up to handle minimize correctly
+              setShowTextEdit(false);
+            }}
           />
         )}
         {showMinesweeper && (
           <MinesweeperWindow 
             id="minesweeper"
-            onClose={() => setShowMinesweeper(false)}
+            onClose={() => {
+              // Do not actually close, just minimize
+              minimizeWindow('minesweeper');
+            }}
           />
         )}
         {showInternetExplorer && (
           <InternetExplorerWindow 
             id="internetexplorer"
-            onClose={() => setShowInternetExplorer(false)}
+            onClose={() => {
+              // Do not actually close, just minimize
+              minimizeWindow('internetexplorer');
+            }}
           />
         )}
         {showControlPanels && (
           <ControlPanelsWindow 
             id="controlpanels"
-            onClose={() => setShowControlPanels(false)}
+            onClose={() => {
+              // Do not actually close, just minimize
+              minimizeWindow('controlpanels');
+            }}
             onWallpaperChange={(wallpaper) => setCurrentWallpaper(wallpaper)}
           />
         )}

@@ -1,5 +1,6 @@
 import { Window } from './Window';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useWindow } from '../contexts/WindowContext';
 
 interface TextEditWindowProps {
   onClose: () => void;
@@ -28,6 +29,7 @@ export function TextEditWindow({ onClose, id, initialContent = '', documentName 
   const [isEdited, setIsEdited] = useState(false);
   const [showFontDropdown, setShowFontDropdown] = useState(false);
   const [selectedFont, setSelectedFont] = useState(fonts[0]);
+  const [currentContent, setCurrentContent] = useState(initialContent);
   const [activeFormats, setActiveFormats] = useState({
     bold: false,
     italic: false,
@@ -39,15 +41,116 @@ export function TextEditWindow({ onClose, id, initialContent = '', documentName 
     numberList: false
   });
   const editorRef = useRef<HTMLDivElement>(null);
+  const { isWindowMinimized } = useWindow();
 
+  // Load initial content
   useEffect(() => {
     if (editorRef.current) {
-      editorRef.current.innerHTML = initialContent;
+      // Start with fresh content when explicitly provided
+      // Otherwise, start with empty content
+      editorRef.current.innerHTML = initialContent || '';
+      setCurrentContent(initialContent || '');
+      
       // Enable editing commands
       document.execCommand('defaultParagraphSeparator', false, 'p');
       editorRef.current.focus();
     }
   }, [initialContent]);
+
+  // Save content to state and session storage when it changes
+  useEffect(() => {
+    const handleInput = () => {
+      if (editorRef.current) {
+        const content = editorRef.current.innerHTML;
+        setCurrentContent(content);
+        setIsEdited(true);
+        
+        // Save to session storage immediately when content changes
+        const tempEditorState = {
+          content,
+          fileName,
+          isEdited: true
+        };
+        sessionStorage.setItem(`textEdit_temp_${id}`, JSON.stringify(tempEditorState));
+      }
+    };
+    
+    const editor = editorRef.current;
+    if (editor) {
+      editor.addEventListener('input', handleInput);
+      
+      // Also attach a blur event to save content when focus is lost
+      editor.addEventListener('blur', handleInput);
+    }
+    
+    return () => {
+      if (editor) {
+        editor.removeEventListener('input', handleInput);
+        editor.removeEventListener('blur', handleInput);
+      }
+    };
+  }, [id, fileName]);
+
+  // Monitor window state changes (minimize/unminimize)
+  useEffect(() => {
+    // We need to track minimize state changes
+    let minimizeState = isWindowMinimized(id);
+    let lastContentSaved = currentContent;
+    
+    // Set up an interval to check for state changes
+    const intervalId = setInterval(() => {
+      const newMinimizeState = isWindowMinimized(id);
+      
+      // If state changed (window was minimized or unminimized)
+      if (minimizeState !== newMinimizeState) {
+        minimizeState = newMinimizeState;
+        
+        if (minimizeState) {
+          // Window was just minimized - save current content
+          if (editorRef.current) {
+            const currentText = editorRef.current.innerHTML;
+            lastContentSaved = currentText;
+            
+            // Save to state and session storage
+            setCurrentContent(currentText);
+            const tempEditorState = {
+              content: currentText,
+              fileName,
+              isEdited
+            };
+            sessionStorage.setItem(`textEdit_temp_${id}`, JSON.stringify(tempEditorState));
+          }
+        } else {
+          // Window was just unminimized - check if we need to restore
+          if (editorRef.current && lastContentSaved) {
+            // Make sure editor content matches what we saved
+            if (editorRef.current.innerHTML !== lastContentSaved) {
+              editorRef.current.innerHTML = lastContentSaved;
+              setCurrentContent(lastContentSaved);
+            }
+          }
+        }
+      }
+      
+      // Also check if content has changed since last save
+      if (editorRef.current && !minimizeState) {
+        const currentText = editorRef.current.innerHTML;
+        if (currentText !== lastContentSaved) {
+          lastContentSaved = currentText;
+          
+          // Save to session storage periodically when content changes
+          const tempEditorState = {
+            content: currentText,
+            fileName,
+            isEdited: true
+          };
+          sessionStorage.setItem(`textEdit_temp_${id}`, JSON.stringify(tempEditorState));
+        }
+      }
+    }, 100); // Check frequently
+    
+    return () => clearInterval(intervalId);
+  }, [id, fileName, isEdited, isWindowMinimized, currentContent]);
 
   // Check active formats when selection changes
   useEffect(() => {
@@ -124,17 +227,22 @@ export function TextEditWindow({ onClose, id, initialContent = '', documentName 
   };
 
   // Load saved documents from local storage
-  const getSavedDocuments = (): SavedDocument[] => {
+  const getSavedDocuments = useCallback((): SavedDocument[] => {
     const saved = localStorage.getItem('textEditDocuments');
     return saved ? JSON.parse(saved) : [];
-  };
+  }, []);
 
   // Save document to local storage
-  const saveDocument = (name: string) => {
+  const saveDocument = useCallback((name: string) => {
+    // Always get the most current content from the editor
+    const content = editorRef.current ? editorRef.current.innerHTML : currentContent || '';
+    
+    // Ensure state is updated
+    setCurrentContent(content);
+    
     const documents = getSavedDocuments();
     const now = new Date().toISOString();
-    const id = `doc_${Date.now()}`;
-    const content = editorRef.current?.innerHTML || '';
+    const documentId = `doc_${Date.now()}`;
 
     // Check if document with this name already exists
     const existingIndex = documents.findIndex(doc => doc.name === name);
@@ -146,7 +254,7 @@ export function TextEditWindow({ onClose, id, initialContent = '', documentName 
       };
     } else {
       documents.push({
-        id,
+        id: documentId,
         name,
         content,
         lastModified: now
@@ -157,24 +265,92 @@ export function TextEditWindow({ onClose, id, initialContent = '', documentName 
     setFileName(name);
     setIsEdited(false);
     setShowSaveDialog(false);
-  };
+    
+    // Also update session storage with latest state
+    const tempEditorState = {
+      content,
+      fileName: name,
+      isEdited: false
+    };
+    sessionStorage.setItem(`textEdit_temp_${id}`, JSON.stringify(tempEditorState));
+  }, [currentContent, id, getSavedDocuments, setCurrentContent, setFileName, setIsEdited, setShowSaveDialog]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
+    // Capture the current content state before showing dialog
+    if (editorRef.current) {
+      setCurrentContent(editorRef.current.innerHTML);
+    }
+    
     if (fileName === 'Untitled') {
       setShowSaveDialog(true);
     } else {
       saveDocument(fileName);
     }
-  };
+  }, [fileName, saveDocument]);
 
-  const handleClose = () => {
-    if (isEdited) {
-      if (window.confirm('Do you want to save changes?')) {
-        handleSave();
-      }
+  // Direct close without confirmation dialog
+  const handleDirectClose = useCallback(() => {
+    // When closing directly, we want to clear any saved state
+    // to start fresh when reopening
+    
+    // If content is edited but not saved, save to localStorage
+    if (isEdited && fileName !== 'Untitled' && editorRef.current) {
+      saveDocument(fileName);
     }
-    onClose();
-  };
+    
+    // Clear session storage on close so reopening starts fresh
+    sessionStorage.removeItem(`textEdit_temp_${id}`);
+  }, [id, isEdited, fileName, saveDocument]);
+
+  // Regular close with confirmation dialog
+  const handleCloseRequest = useCallback(() => {
+    // Save the current state to session storage as a final backup
+    if (editorRef.current) {
+      const currentText = editorRef.current.innerHTML;
+      setCurrentContent(currentText);
+      
+      // For actual close (not minimize), prompt to save if needed
+      if (isEdited) {
+        if (window.confirm('Do you want to save changes?')) {
+          handleSave();
+        }
+      }
+      
+      // Clear session storage on close so reopening starts fresh
+      sessionStorage.removeItem(`textEdit_temp_${id}`);
+      
+      onClose();
+    } else {
+      // If no editor ref, just close
+      sessionStorage.removeItem(`textEdit_temp_${id}`);
+      onClose();
+    }
+  }, [id, isEdited, onClose, handleSave]);
+
+  // This function will be used with useEffect to handle window events
+  useEffect(() => {
+    // Listen for close event from File menu
+    const handleFileMenuClose = () => {
+      if (id === 'textedit') {
+        handleCloseRequest();
+      }
+    };
+    
+    // Listen for direct close event from File menu
+    const handleFileMenuDirectClose = () => {
+      if (id === 'textedit') {
+        handleDirectClose();
+      }
+    };
+    
+    window.addEventListener('textedit-close-request', handleFileMenuClose);
+    window.addEventListener('textedit-close-direct', handleFileMenuDirectClose);
+
+    return () => {
+      window.removeEventListener('textedit-close-request', handleFileMenuClose);
+      window.removeEventListener('textedit-close-direct', handleFileMenuDirectClose);
+    };
+  }, [id, handleCloseRequest, handleDirectClose]);
 
   // Add debug CSS to editor with explicit list styling
   useEffect(() => {
@@ -201,12 +377,80 @@ export function TextEditWindow({ onClose, id, initialContent = '', documentName 
     }
   }, []);
 
+  // Restore from temporary storage when component loads or is unminimized
+  useEffect(() => {
+    const restoreContent = () => {
+      // Only restore state if this window was previously minimized, not closed
+      // Desktop component will clear session storage on app launch if it was closed
+      const savedState = sessionStorage.getItem(`textEdit_temp_${id}`);
+      if (savedState && isWindowMinimized(id) === false) {
+        try {
+          const { content, fileName: savedFileName, isEdited: savedIsEdited } = JSON.parse(savedState);
+          
+          // Only restore if we have content
+          if (content && editorRef.current) {
+            // Always sync content with what's in session storage
+            if (editorRef.current.innerHTML !== content) {
+              editorRef.current.innerHTML = content;
+              setCurrentContent(content);
+            }
+          }
+          
+          if (savedFileName && savedFileName !== fileName) {
+            setFileName(savedFileName);
+          }
+          
+          setIsEdited(savedIsEdited);
+        } catch (error) {
+          console.error('Error restoring text editor state:', error);
+        }
+      }
+    };
+    
+    // Restore when component mounts if window is minimized
+    if (isWindowMinimized(id) === false) {
+      restoreContent();
+    }
+    
+    // Also restore when window is unminimized
+    const checkMinimizeState = () => {
+      if (!isWindowMinimized(id)) {
+        restoreContent();
+      }
+    };
+    
+    // Set up an interval to check for unminimize events
+    const intervalId = setInterval(checkMinimizeState, 100);
+    
+    return () => clearInterval(intervalId);
+  }, [id, fileName, isWindowMinimized]);
+
+  // Focus the filename input when the save dialog appears
+  useEffect(() => {
+    if (showSaveDialog) {
+      // Short delay to ensure the dialog is rendered
+      const timer = setTimeout(() => {
+        const input = document.querySelector(`#${id}-filename-input`) as HTMLInputElement;
+        if (input) {
+          input.focus();
+          input.select(); // Select all text for easy replacement
+        }
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showSaveDialog, id]);
+
+  // Monitor fileName state changes
+  useEffect(() => {
+    console.log('fileName state changed to:', fileName);
+  }, [fileName]);
+
   return (
     <>
       <Window
         id={id}
         title={`${fileName}${isEdited ? ' •' : ''} - TextEdit`}
-        onClose={handleClose}
         initialPosition={{ x: 150, y: 50 }}
         initialSize={{ width: 500, height: 400 }}
       >
@@ -338,65 +582,98 @@ export function TextEditWindow({ onClose, id, initialContent = '', documentName 
             </button>
           </div>
 
-          {/* Text Editor */}
-          <div
+          {/* Editor Area */}
+          <div 
             ref={editorRef}
-            className={`flex-1 outline-none overflow-auto ${selectedFont.value}`}
+            className={`flex-1 p-4 outline-none overflow-auto ${selectedFont.value}`}
             contentEditable
             onInput={() => setIsEdited(true)}
-            style={{ 
-              whiteSpace: 'pre-wrap',
-              minHeight: '100%',
-              padding: '4px 16px'
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (activeFormats.bulletList || activeFormats.numberList)) {
-                if (e.currentTarget.textContent?.trim() === '') {
-                  e.preventDefault();
-                  formatText(activeFormats.bulletList ? 'insertUnorderedList' : 'insertOrderedList');
-                }
-              }
-            }}
           />
         </div>
       </Window>
 
-      {/* Save Dialog */}
       {showSaveDialog && (
-        <Window
-          id={`${id}-save-dialog`}
-          title="Save As..."
-          onClose={() => setShowSaveDialog(false)}
-          initialPosition={{ x: 250, y: 150 }}
-          initialSize={{ width: 400, height: 200 }}
-          disableResize={true}
+        <div 
+          className="fixed inset-0 z-[9999] bg-transparent"
+          onClick={(e) => {
+            // This overlay prevents clicks outside the dialog
+            e.stopPropagation();
+          }}
         >
-          <div className="p-4 bg-white flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <label className="font-chicago text-sm">Document Name:</label>
-              <input
-                type="text"
-                value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
-                className="border border-gray-400 p-1 font-chicago text-sm"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowSaveDialog(false)}
-                className="px-4 py-1 border border-gray-400 rounded font-chicago text-sm hover:bg-gray-100"
+          <Window
+            id={`${id}-save-dialog`}
+            title="Save Document"
+            initialPosition={{ x: 200, y: 150 }}
+            initialSize={{ width: 300, height: 150 }}
+            disableResize={true}
+          >
+            <div className="p-4 flex flex-col h-full" onClick={(e) => e.stopPropagation()}>
+              <form 
+                className="flex flex-col h-full" 
+                onSubmit={(e) => {
+                  console.log('Form submitted');
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const filename = formData.get('filename') as string || fileName;
+                  saveDocument(filename);
+                }}
+                onClick={(e) => {
+                  console.log('Form clicked at', e.target);
+                  e.stopPropagation();
+                }}
               >
-                Cancel
-              </button>
-              <button
-                onClick={() => saveDocument(fileName)}
-                className="px-4 py-1 border border-gray-400 rounded font-chicago text-sm hover:bg-gray-100"
-              >
-                Save
-              </button>
+                <div className="mb-4">
+                  <label className="block mb-1" htmlFor={`${id}-filename-input`}>Save as:</label>
+                  <input 
+                    id={`${id}-filename-input`}
+                    name="filename"
+                    type="text" 
+                    defaultValue={fileName} 
+                    onChange={(e) => {
+                      console.log('Input onChange fired:', e.target.value);
+                      setFileName(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      console.log('Key pressed:', e.key);
+                      e.stopPropagation();
+                    }}
+                    onFocus={(e) => {
+                      console.log('Input focused');
+                      // Select all text on focus
+                      e.target.select();
+                    }}
+                    onBlur={() => console.log('Input lost focus')}
+                    onClick={(e) => {
+                      console.log('Input clicked');
+                      e.stopPropagation();
+                    }}
+                    className="w-full p-1 border border-gray-500"
+                    autoFocus
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="flex justify-end mt-auto">
+                  <button 
+                    type="button"
+                    className="border border-gray-500 bg-[#DDDDDD] px-4 py-1 rounded mr-2 hover:bg-gray-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSaveDialog(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="border border-gray-500 bg-[#DDDDDD] px-4 py-1 rounded hover:bg-gray-200"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
             </div>
-          </div>
-        </Window>
+          </Window>
+        </div>
       )}
     </>
   );

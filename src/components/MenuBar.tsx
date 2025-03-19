@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useWindow } from '../contexts/WindowContext'
 import appleIcon from '../assets/apple.png'
 import textEditIcon from '../assets/TextEdit.png'
 import mineIcon from '../assets/mine.png'
@@ -33,6 +34,7 @@ export function MenuBar({ currentTime, onAboutClick, onControlPanelsClick, onApp
   const [isAppleMenuOpen, setIsAppleMenuOpen] = useState(false);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
+  const { closeWindow, getActiveWindow } = useWindow();
 
   const handleAppleMenuClick = () => {
     setIsAppleMenuOpen(!isAppleMenuOpen);
@@ -69,6 +71,22 @@ export function MenuBar({ currentTime, onAboutClick, onControlPanelsClick, onApp
       onAppLaunch('macintoshHd');
       setIsFileMenuOpen(false);
     }
+  };
+
+  const handleFileClose = () => {
+    const activeWindowId = getActiveWindow();
+    if (activeWindowId) {
+      // For TextEdit windows, we need to save before closing but without dialog
+      if (activeWindowId === 'textedit') {
+        // Save current state to session storage before closing
+        const event = new CustomEvent('textedit-close-direct');
+        window.dispatchEvent(event);
+      }
+      
+      // Close the window immediately
+      closeWindow(activeWindowId);
+    }
+    handleClickOutside();
   };
 
   // Close menu when clicking outside
@@ -180,7 +198,7 @@ export function MenuBar({ currentTime, onAboutClick, onControlPanelsClick, onApp
               </button>
               <div className="mt-1 border-b border-gray-200" />
               <button 
-                onClick={handleClickOutside}
+                onClick={handleFileClose}
                 className="w-full text-left px-4 py-1 text-sm font-chicago font-semibold hover:bg-gray-200"
               >
                 Close
