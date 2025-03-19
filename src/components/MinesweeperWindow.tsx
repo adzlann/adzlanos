@@ -25,7 +25,7 @@ export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
   const { isWindowMinimized } = useWindow();
 
   // Initialize game board
-  const initializeGrid = () => {
+  const initializeGrid = useCallback(() => {
     // Create empty grid
     const newGrid: Cell[][] = Array(GRID_SIZE).fill(null).map(() =>
       Array(GRID_SIZE).fill(null).map(() => ({
@@ -68,24 +68,37 @@ export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
     }
 
     return newGrid;
-  };
+  }, [GRID_SIZE, MINE_COUNT]);
 
   // Save game state when minimized
   useEffect(() => {
     // Function to save the current game state
     const saveGameState = () => {
-      const gameState = {
-        grid,
-        gameOver,
-        gameWon,
-        minesLeft,
-        faceIcon
-      };
-      sessionStorage.setItem(`minesweeper_state_${id}`, JSON.stringify(gameState));
+      // Only save if we have a valid grid
+      if (grid && grid.length > 0) {
+        const gameState = {
+          grid,
+          gameOver,
+          gameWon,
+          minesLeft,
+          faceIcon
+        };
+        
+        try {
+          sessionStorage.setItem(`minesweeper_state_${id}`, JSON.stringify(gameState));
+          console.log('Minesweeper state saved:', gameState);
+        } catch (error) {
+          console.error('Error saving Minesweeper state:', error);
+        }
+      }
     };
 
-    // Save state when component mounts
+    // Save state when component mounts and whenever state changes
     saveGameState();
+
+    // Also save on window beforeunload
+    const handleBeforeUnload = () => saveGameState();
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     // Set up interval to check window state
     let minimizeState = isWindowMinimized(id);
@@ -100,42 +113,55 @@ export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
       minimizeState = newMinimizeState;
     }, 100);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      
+      // Save state one last time when unmounting
+      saveGameState();
+    };
   }, [id, grid, gameOver, gameWon, minesLeft, faceIcon, isWindowMinimized]);
 
   // Restore game state when component mounts or is unminimized
   useEffect(() => {
     const restoreGameState = () => {
       const savedState = sessionStorage.getItem(`minesweeper_state_${id}`);
+      console.log('Attempting to restore Minesweeper state from:', savedState);
+      
       if (savedState) {
         try {
           const { grid: savedGrid, gameOver: savedGameOver, gameWon: savedGameWon, 
                  minesLeft: savedMinesLeft, faceIcon: savedFaceIcon } = JSON.parse(savedState);
           
           if (savedGrid && savedGrid.length) {
+            console.log('Restoring saved grid');
             setGrid(savedGrid);
+            
+            if (savedGameOver !== undefined) setGameOver(savedGameOver);
+            if (savedGameWon !== undefined) setGameWon(savedGameWon);
+            if (savedMinesLeft !== undefined) setMinesLeft(savedMinesLeft);
+            if (savedFaceIcon) setFaceIcon(savedFaceIcon);
           } else {
-            // Initialize grid if no valid saved grid
+            console.log('No valid saved grid, initializing new grid');
             setGrid(initializeGrid());
           }
-          
-          if (savedGameOver !== undefined) setGameOver(savedGameOver);
-          if (savedGameWon !== undefined) setGameWon(savedGameWon);
-          if (savedMinesLeft !== undefined) setMinesLeft(savedMinesLeft);
-          if (savedFaceIcon) setFaceIcon(savedFaceIcon);
         } catch (error) {
           console.error('Error restoring Minesweeper state:', error);
           // If restoration fails, initialize a new game
           setGrid(initializeGrid());
         }
       } else {
+        console.log('No saved state found, initializing new grid');
         // If no saved state, initialize a new game
         setGrid(initializeGrid());
       }
     };
 
-    // Restore state when component mounts
-    restoreGameState();
+    // Initial state setup - only initialize grid if it's empty
+    if (!grid || grid.length === 0) {
+      // Restore from storage or create new
+      restoreGameState();
+    }
 
     // Also set up a listener for unminimize events
     let minimizeState = isWindowMinimized(id);
@@ -151,7 +177,7 @@ export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
     }, 100);
 
     return () => clearInterval(intervalId);
-  }, [id, isWindowMinimized]);
+  }, [id, isWindowMinimized, grid, initializeGrid]);
 
   // Override resetGame to clear saved state
   const resetGame = useCallback(() => {
@@ -163,7 +189,7 @@ export function MinesweeperWindow({ onClose, id }: MinesweeperWindowProps) {
     
     // Clear saved state when starting a new game
     sessionStorage.removeItem(`minesweeper_state_${id}`);
-  }, [id]);
+  }, [id, initializeGrid, MINE_COUNT]);
 
   // Reveal cell and its neighbors if it's empty
   const revealCell = (y: number, x: number, currentGrid: Cell[][]) => {

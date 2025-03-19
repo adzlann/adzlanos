@@ -96,6 +96,17 @@ export function Desktop() {
     return unsubscribe;
   }, [onWindowClose]);
 
+  // Sync application visibility with window context state
+  useEffect(() => {
+    // Update visibility states based on window context
+    setShowFinderWindow(isWindowOpen('finder') && !isWindowMinimized('finder'));
+    setShowTextEdit(isWindowOpen('textedit') && !isWindowMinimized('textedit'));
+    setShowMinesweeper(isWindowOpen('minesweeper') && !isWindowMinimized('minesweeper'));
+    setShowInternetExplorer(isWindowOpen('internetexplorer') && !isWindowMinimized('internetexplorer'));
+    setShowAboutWindow(isWindowOpen('about') && !isWindowMinimized('about'));
+    setShowControlPanels(isWindowOpen('controlpanels') && !isWindowMinimized('controlpanels'));
+  }, [isWindowOpen, isWindowMinimized]);
+
   const handleDesktopClick = () => {
     // Clear any selections when clicking the desktop
     const icons = document.querySelectorAll('.desktop-icon');
@@ -139,6 +150,8 @@ export function Desktop() {
         if (isWindowMinimized('minesweeper')) {
           unminimizeWindow('minesweeper');
         } else if (!isWindowOpen('minesweeper')) {
+          // Clear session storage when reopening Minesweeper after it's been closed
+          sessionStorage.removeItem('minesweeper_state_minesweeper');
           reopenWindow('minesweeper');
           setShowMinesweeper(true);
           bringToFront('minesweeper');
@@ -175,6 +188,7 @@ export function Desktop() {
             unminimizeWindow('about');
           } else if (!showAboutWindow) {
             setShowAboutWindow(true);
+            reopenWindow('about');
             bringToFront('about');
           } else {
             bringToFront('about');
@@ -185,6 +199,7 @@ export function Desktop() {
             unminimizeWindow('controlpanels');
           } else if (!showControlPanels) {
             setShowControlPanels(true);
+            reopenWindow('controlpanels');
             bringToFront('controlpanels');
           } else {
             bringToFront('controlpanels');
@@ -235,8 +250,8 @@ export function Desktop() {
           <TextEditWindow 
             id="textedit"
             onClose={() => {
-              // TextEdit is already set up to handle minimize correctly
-              setShowTextEdit(false);
+              // Do not actually close, just minimize
+              minimizeWindow('textedit');
             }}
           />
         )}

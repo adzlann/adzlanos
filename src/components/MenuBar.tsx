@@ -34,7 +34,7 @@ export function MenuBar({ currentTime, onAboutClick, onControlPanelsClick, onApp
   const [isAppleMenuOpen, setIsAppleMenuOpen] = useState(false);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
-  const { closeWindow, getActiveWindow } = useWindow();
+  const { getActiveWindow, minimizeWindow, closeWindow } = useWindow();
 
   const handleAppleMenuClick = () => {
     setIsAppleMenuOpen(!isAppleMenuOpen);
@@ -76,15 +76,23 @@ export function MenuBar({ currentTime, onAboutClick, onControlPanelsClick, onApp
   const handleFileClose = () => {
     const activeWindowId = getActiveWindow();
     if (activeWindowId) {
-      // For TextEdit windows, we need to save before closing but without dialog
+      // For TextEdit windows, we need to save before minimizing
       if (activeWindowId === 'textedit') {
-        // Save current state to session storage before closing
+        // Save current state to session storage before minimizing
         const event = new CustomEvent('textedit-close-direct');
         window.dispatchEvent(event);
+        minimizeWindow(activeWindowId);
       }
-      
-      // Close the window immediately
-      closeWindow(activeWindowId);
+      // For Minesweeper, we want to actually close it to start fresh next time
+      else if (activeWindowId === 'minesweeper') {
+        // Remove any saved state
+        sessionStorage.removeItem(`minesweeper_state_${activeWindowId}`);
+        closeWindow(activeWindowId);
+      }
+      // For any other window, minimize to preserve state
+      else {
+        minimizeWindow(activeWindowId);
+      }
     }
     handleClickOutside();
   };

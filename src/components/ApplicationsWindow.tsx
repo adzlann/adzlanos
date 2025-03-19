@@ -53,21 +53,50 @@ export function ApplicationsWindow({ onClose, id }: ApplicationsWindowProps) {
   const [showTextEdit, setShowTextEdit] = useState(false);
   const [showMinesweeper, setShowMinesweeper] = useState(false);
   const [showInternetExplorer, setShowInternetExplorer] = useState(false);
-  const { bringToFront } = useWindow();
+  const { bringToFront, isWindowMinimized, unminimizeWindow, minimizeWindow, isWindowOpen } = useWindow();
 
   const handleDoubleClick = (file: File) => {
     switch (file.id) {
       case 'textedit':
-        setShowTextEdit(true);
-        bringToFront(`${id}-textedit`);
+        if (isWindowMinimized('textedit')) {
+          // If window is minimized, unminimize it
+          unminimizeWindow('textedit');
+        } else if (isWindowOpen('textedit')) {
+          // If window is open but not shown in this view, bring it to front
+          bringToFront('textedit');
+        } else {
+          // Otherwise show a new window
+          setShowTextEdit(true);
+          bringToFront('textedit');
+        }
         break;
       case 'minesweeper':
-        setShowMinesweeper(true);
-        bringToFront(`${id}-minesweeper`);
+        if (isWindowMinimized('minesweeper')) {
+          // If window is minimized, unminimize it
+          unminimizeWindow('minesweeper');
+        } else if (isWindowOpen('minesweeper')) {
+          // If window is open but not shown in this view, bring it to front
+          bringToFront('minesweeper');
+        } else {
+          // Clear session storage when opening a fresh minesweeper window
+          sessionStorage.removeItem('minesweeper_state_minesweeper');
+          // Otherwise show a new window
+          setShowMinesweeper(true);
+          bringToFront('minesweeper');
+        }
         break;
       case 'internetexplorer':
-        setShowInternetExplorer(true);
-        bringToFront(`${id}-internetexplorer`);
+        if (isWindowMinimized('internetexplorer')) {
+          // If window is minimized, unminimize it
+          unminimizeWindow('internetexplorer');
+        } else if (isWindowOpen('internetexplorer')) {
+          // If window is open but not shown in this view, bring it to front
+          bringToFront('internetexplorer');
+        } else {
+          // Otherwise show a new window
+          setShowInternetExplorer(true);
+          bringToFront('internetexplorer');
+        }
         break;
     }
   };
@@ -127,24 +156,28 @@ export function ApplicationsWindow({ onClose, id }: ApplicationsWindowProps) {
         </div>
       </Window>
 
+      {/* Application Windows */}
       {showTextEdit && (
         <TextEditWindow 
-          id={`${id}-textedit`}
-          onClose={() => setShowTextEdit(false)} 
+          id="textedit"
+          onClose={() => setShowTextEdit(false)}
         />
       )}
-
       {showMinesweeper && (
         <MinesweeperWindow 
-          id={`${id}-minesweeper`}
-          onClose={() => setShowMinesweeper(false)} 
+          id="minesweeper"
+          onClose={() => {
+            // Do not actually close here, just hide from this view
+            setShowMinesweeper(false);
+            // We minimize instead of closing to preserve state
+            minimizeWindow('minesweeper');
+          }}
         />
       )}
-
       {showInternetExplorer && (
         <InternetExplorerWindow 
-          id={`${id}-internetexplorer`}
-          onClose={() => setShowInternetExplorer(false)} 
+          id="internetexplorer"
+          onClose={() => setShowInternetExplorer(false)}
         />
       )}
     </>
