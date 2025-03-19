@@ -14,6 +14,9 @@ import mineIcon from '../assets/mine.png';
 import explorerIcon from '../assets/explorer.png';
 import thunderWallpaper from '../assets/wallpaper/thunder_wallpaper.jpg';
 
+// Constants
+const WALLPAPER_STORAGE_KEY = 'macos7_desktop_wallpaper';
+
 interface Application {
   id: string;
   name: string;
@@ -68,6 +71,20 @@ export function Desktop() {
     minimizeWindow,
     hasLoadedInitialState
   } = useWindow();
+
+  // Load saved wallpaper from localStorage on initial mount
+  useEffect(() => {
+    const savedWallpaper = localStorage.getItem(WALLPAPER_STORAGE_KEY);
+    if (savedWallpaper) {
+      setCurrentWallpaper(savedWallpaper);
+    }
+  }, []);
+
+  // Save wallpaper to localStorage whenever it changes
+  const handleWallpaperChange = (wallpaper: string) => {
+    setCurrentWallpaper(wallpaper);
+    localStorage.setItem(WALLPAPER_STORAGE_KEY, wallpaper);
+  };
 
   // Update clock
   useEffect(() => {
@@ -322,7 +339,7 @@ export function Desktop() {
               // Do not actually close, just minimize
               minimizeWindow('controlpanels');
             }}
-            onWallpaperChange={(wallpaper) => setCurrentWallpaper(wallpaper)}
+            onWallpaperChange={handleWallpaperChange}
           />
         )}
       </div>
