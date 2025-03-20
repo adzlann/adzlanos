@@ -1,4 +1,23 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface Size {
+  width: number;
+  height: number;
+}
+
+interface WindowState {
+  position: Position;
+  size: Size;
+}
+
+interface WindowsPositionsState {
+  [id: string]: WindowState;
+}
 
 interface WindowContextType {
   bringToFront: (id: string) => void;
@@ -12,45 +31,82 @@ interface WindowContextType {
   onWindowClose: (callback: (id: string) => void) => () => void;
   reopenWindow: (id: string) => void;
   hasLoadedInitialState: boolean;
+  saveWindowPosition: (id: string, position: Position, size: Size) => void;
+  getWindowPosition: (id: string) => WindowState | null;
 }
 
 const WindowContext = createContext<WindowContextType | null>(null);
 
-export function WindowProvider({ children }: { children: React.ReactNode }) {
-  const [windowOrder, setWindowOrder] = useState<string[]>([]);
-  const [minimizedWindows, setMinimizedWindows] = useState<string[]>([]);
-  const [closedWindows, setClosedWindows] = useState<string[]>(['finder', 'textedit', 'minesweeper', 'internetexplorer', 'about', 'controlpanels']);
-  const [closeListeners] = useState<Set<(id: string) => void>>(() => new Set());
-  const [hasLoadedInitialState, setHasLoadedInitialState] = useState(false);
+// Helper function to safely parse JSON
+const safeParseJSON = <T,>(json: string | null, defaultValue: T): T => {
+  if (!json) return defaultValue;
+  try {
+    return JSON.parse(json) as T;
+  } catch (error) {
+    console.error('Error parsing JSON:', error);
+    return defaultValue;
+  }
+};
 
-  // Load window state from localStorage on initial render
-  useEffect(() => {
-    const savedState = localStorage.getItem('window_state');
-    if (savedState) {
-      try {
-        const { minimizedWindows: savedMinimized, closedWindows: savedClosed, windowOrder: savedOrder } = JSON.parse(savedState);
-        if (savedMinimized) setMinimizedWindows(savedMinimized);
-        if (savedClosed) setClosedWindows(savedClosed);
-        if (savedOrder) setWindowOrder(savedOrder);
-      } catch (error) {
-        console.error('Error restoring window state:', error);
-      }
+export function WindowProvider({ children }: { children: React.ReactNode }) {
+  // Load initial state from localStorage immediately (not in an effect)
+  const savedPositions = safeParseJSON<WindowsPositionsState>(
+    localStorage.getItem('window_positions'), 
+    {}
+  );
+  
+  const savedState = safeParseJSON<{
+    minimizedWindows: string[],
+    closedWindows: string[],
+    windowOrder: string[]
+  }>(
+    localStorage.getItem('window_state'),
+    {
+      minimizedWindows: [],
+      closedWindows: ['finder', 'textedit', 'minesweeper', 'internetexplorer', 'about', 'controlpanels'],
+      windowOrder: []
     }
-    setHasLoadedInitialState(true);
-  }, []);
+  );
+
+  const [windowOrder, setWindowOrder] = useState<string[]>(savedState.windowOrder || []);
+  const [minimizedWindows, setMinimizedWindows] = useState<string[]>(savedState.minimizedWindows || []);
+  const [closedWindows, setClosedWindows] = useState<string[]>(savedState.closedWindows || ['finder', 'textedit', 'minesweeper', 'internetexplorer', 'about', 'controlpanels']);
+  const [windowPositions, setWindowPositions] = useState<WindowsPositionsState>(savedPositions);
+  const [closeListeners] = useState<Set<(id: string) => void>>(() => new Set());
+  const hasLoadedInitialState = true;
 
   // Save window state to localStorage whenever it changes
   useEffect(() => {
-    // Only save if we've loaded the initial state, to avoid overwriting with default values
-    if (hasLoadedInitialState) {
-      const windowState = {
-        minimizedWindows,
-        closedWindows,
-        windowOrder
-      };
-      localStorage.setItem('window_state', JSON.stringify(windowState));
+    const windowState = {
+      minimizedWindows,
+      closedWindows,
+      windowOrder
+    };
+    localStorage.setItem('window_state', JSON.stringify(windowState));
+  }, [minimizedWindows, closedWindows, windowOrder]);
+
+  // Save window positions to localStorage whenever they change
+  useEffect(() => {
+    if (Object.keys(windowPositions).length > 0) {
+      localStorage.setItem('window_positions', JSON.stringify(windowPositions));
     }
-  }, [minimizedWindows, closedWindows, windowOrder, hasLoadedInitialState]);
+  }, [windowPositions]);
+
+  const saveWindowPosition = useCallback((id: string, position: Position, size: Size) => {
+    setWindowPositions(prev => {
+      const newPositions = {
+        ...prev,
+        [id]: { position, size }
+      };
+      // Immediately save to localStorage for redundancy
+      localStorage.setItem('window_positions', JSON.stringify(newPositions));
+      return newPositions;
+    });
+  }, []);
+
+  const getWindowPosition = useCallback((id: string): WindowState | null => {
+    return windowPositions[id] || null;
+  }, [windowPositions]);
 
   const bringToFront = useCallback((id: string) => {
     setWindowOrder(prev => {
@@ -117,20 +173,38 @@ export function WindowProvider({ children }: { children: React.ReactNode }) {
     bringToFront(id);
   }, [bringToFront]);
 
+  const contextValue = useMemo(() => ({
+    bringToFront, 
+    getZIndex, 
+    minimizeWindow, 
+    unminimizeWindow, 
+    isWindowMinimized,
+    closeWindow,
+    isWindowOpen,
+    getActiveWindow,
+    onWindowClose,
+    reopenWindow,
+    hasLoadedInitialState,
+    saveWindowPosition,
+    getWindowPosition
+  }), [
+    bringToFront,
+    getZIndex,
+    minimizeWindow,
+    unminimizeWindow,
+    isWindowMinimized,
+    closeWindow,
+    isWindowOpen,
+    getActiveWindow,
+    onWindowClose,
+    reopenWindow,
+    hasLoadedInitialState,
+    saveWindowPosition,
+    getWindowPosition
+  ]);
+
   return (
-    <WindowContext.Provider value={{ 
-      bringToFront, 
-      getZIndex, 
-      minimizeWindow, 
-      unminimizeWindow, 
-      isWindowMinimized,
-      closeWindow,
-      isWindowOpen,
-      getActiveWindow,
-      onWindowClose,
-      reopenWindow,
-      hasLoadedInitialState
-    }}>
+    <WindowContext.Provider value={contextValue}>
       {children}
     </WindowContext.Provider>
   );

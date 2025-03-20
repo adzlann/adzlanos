@@ -1,7 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useWindow } from '../contexts/WindowContext';
 
 type ResizeDirection = 'e' | 'w' | 'se' | 'sw' | 's' | null;
+
+// Constants for window boundaries
+const MENU_BAR_HEIGHT = 22; // Height of the menu bar at the top of the screen
 
 interface WindowProps {
   title: string;
@@ -24,15 +27,80 @@ export function Window({
   id,
   onClose
 }: WindowProps) {
-  const [position, setPosition] = useState(initialPosition);
-  const [size, setSize] = useState(initialSize);
+  const windowRef = useRef<HTMLDivElement>(null);
+  const hasInitializedRef = useRef(false);
+  const { 
+    bringToFront, 
+    getZIndex, 
+    minimizeWindow, 
+    isWindowMinimized, 
+    isWindowOpen,
+    saveWindowPosition,
+    getWindowPosition
+  } = useWindow();
+
+  // Get saved position before initializing state
+  const savedWindowState = getWindowPosition(id);
+  
+  // Initialize with saved position or default values
+  const [position, setPosition] = useState(savedWindowState?.position || initialPosition);
+  const [size, setSize] = useState(savedWindowState?.size || initialSize);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<ResizeDirection>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0, left: 0 });
-  const windowRef = useRef<HTMLDivElement>(null);
-  const hasInitializedRef = useRef(false);
-  const { bringToFront, getZIndex, minimizeWindow, isWindowMinimized, isWindowOpen } = useWindow();
+  const [windowBounds, setWindowBounds] = useState({ 
+    width: window.innerWidth, 
+    height: window.innerHeight 
+  });
+
+  // Function to constrain window position within desktop bounds, wrapped in useCallback
+  const constrainPosition = useCallback((pos: { x: number; y: number }, windowSize: { width: number; height: number }) => {
+    const { width: screenWidth, height: screenHeight } = windowBounds;
+    
+    // Constrain horizontally - ensure window stays fully on screen
+    // Left boundary constraint
+    let x = Math.max(0, pos.x);
+    // Right boundary constraint
+    x = Math.min(x, screenWidth - windowSize.width);
+    
+    // If window is wider than screen, position it at left edge
+    if (windowSize.width > screenWidth) {
+      x = 0;
+    }
+    
+    // Constrain vertically - ensure window stays below menu bar and within screen
+    // Top boundary constraint (menu bar)
+    let y = Math.max(MENU_BAR_HEIGHT, pos.y);
+    // Bottom boundary constraint
+    y = Math.min(y, screenHeight - windowSize.height);
+    
+    // If window is taller than available space, position it just below menu bar
+    if (windowSize.height > (screenHeight - MENU_BAR_HEIGHT)) {
+      y = MENU_BAR_HEIGHT;
+    }
+    
+    return { x, y };
+  }, [windowBounds]);
+
+  // Update window bounds on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowBounds({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+
+      // Also constrain the window if it's now outside the bounds after resize
+      const constrainedPosition = constrainPosition(position, size);
+      if (constrainedPosition.x !== position.x || constrainedPosition.y !== position.y) {
+        setPosition(constrainedPosition);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [position, size, constrainPosition]);
 
   useEffect(() => {
     if (!hasInitializedRef.current) {
@@ -40,6 +108,13 @@ export function Window({
       hasInitializedRef.current = true;
     }
   }, [id, bringToFront]);
+
+  // Save window position and size when they change and aren't the initial render
+  useEffect(() => {
+    if (hasInitializedRef.current) {
+      saveWindowPosition(id, position, size);
+    }
+  }, [id, position, size, saveWindowPosition]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -68,10 +143,15 @@ export function Window({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        setPosition({
+        // Calculate new position
+        const rawPosition = {
           x: e.clientX - dragOffset.x,
           y: e.clientY - dragOffset.y
-        });
+        };
+        
+        // Apply constraints before setting state
+        const constrainedPosition = constrainPosition(rawPosition, size);
+        setPosition(constrainedPosition);
       } else if (isResizing) {
         const deltaX = e.clientX - resizeStart.x;
         const deltaY = e.clientY - resizeStart.y;
@@ -79,29 +159,71 @@ export function Window({
         let newHeight = size.height;
         let newX = position.x;
 
+        // Variables for case blocks
+        let potentialWidth, potentialLeft, swPotentialWidth, swPotentialLeft;
+
         switch (isResizing) {
           case 'e':
+            // Calculate new width
             newWidth = Math.max(200, resizeStart.width + deltaX);
+            // Ensure window stays within the right edge of the screen
+            newWidth = Math.min(newWidth, windowBounds.width - position.x);
             break;
           case 'w':
-            newWidth = Math.max(200, resizeStart.width - deltaX);
-            newX = resizeStart.left + (resizeStart.width - newWidth);
+            // Calculate potential new width and left position
+            potentialWidth = Math.max(200, resizeStart.width - deltaX);
+            potentialLeft = resizeStart.left + (resizeStart.width - potentialWidth);
+            
+            // Check if new position would be outside left edge
+            if (potentialLeft < 0) {
+              // Calculate maximum possible width based on current position
+              newWidth = resizeStart.width + resizeStart.left;
+              newX = 0;
+            } else {
+              newWidth = potentialWidth;
+              newX = potentialLeft;
+            }
             break;
           case 's':
+            // Calculate new height
             newHeight = Math.max(150, resizeStart.height + deltaY);
+            // Ensure window stays within the bottom edge of the screen
+            newHeight = Math.min(newHeight, windowBounds.height - position.y);
             break;
           case 'se':
+            // Calculate new width and height
             newWidth = Math.max(200, resizeStart.width + deltaX);
             newHeight = Math.max(150, resizeStart.height + deltaY);
+            
+            // Ensure window stays within the screen boundaries
+            newWidth = Math.min(newWidth, windowBounds.width - position.x);
+            newHeight = Math.min(newHeight, windowBounds.height - position.y);
             break;
           case 'sw':
-            newWidth = Math.max(200, resizeStart.width - deltaX);
+            // Calculate potential new width and left position
+            swPotentialWidth = Math.max(200, resizeStart.width - deltaX);
+            swPotentialLeft = resizeStart.left + (resizeStart.width - swPotentialWidth);
+            
+            // Calculate new height
             newHeight = Math.max(150, resizeStart.height + deltaY);
-            newX = resizeStart.left + (resizeStart.width - newWidth);
+            
+            // Check if new position would be outside left edge
+            if (swPotentialLeft < 0) {
+              newWidth = resizeStart.width + resizeStart.left;
+              newX = 0;
+            } else {
+              newWidth = swPotentialWidth;
+              newX = swPotentialLeft;
+            }
+            
+            // Ensure window stays within the bottom edge of the screen
+            newHeight = Math.min(newHeight, windowBounds.height - position.y);
             break;
         }
 
+        // Set new size
         setSize({ width: newWidth, height: newHeight });
+        // Update position if changed
         if (newX !== position.x) {
           setPosition({ x: newX, y: position.y });
         }
@@ -122,7 +244,26 @@ export function Window({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dragOffset, resizeStart, position.y, position.x, size.height, size.width]);
+  }, [isDragging, isResizing, dragOffset, resizeStart, position, size, windowBounds, constrainPosition]);
+
+  // Initial constraint check for windows loaded from localStorage
+  useEffect(() => {
+    // Create a flag to track whether this is the initial render
+    const isInitialMount = !hasInitializedRef.current;
+    
+    // Only run on initial mount
+    if (isInitialMount) {
+      // Wait for next render cycle to ensure window dimensions are available
+      const timeoutId = setTimeout(() => {
+        const constrainedPosition = constrainPosition(position, size);
+        if (constrainedPosition.x !== position.x || constrainedPosition.y !== position.y) {
+          setPosition(constrainedPosition);
+        }
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [position, size, constrainPosition, hasInitializedRef]);
 
   if (!isWindowOpen(id) || isWindowMinimized(id)) {
     return null;
@@ -140,12 +281,9 @@ export function Window({
         zIndex: getZIndex(id),
       }}
       onClick={(e) => {
-        console.log(`Window ${id} clicked:`, e.target, 'Tag:', (e.target as HTMLElement).tagName);
         if ((e.target as HTMLElement).tagName !== 'INPUT' && 
             (e.target as HTMLElement).tagName !== 'TEXTAREA') {
           bringToFront(id);
-        } else {
-          console.log('Skipping bringToFront for input element');
         }
       }}
       data-window-id={id}
